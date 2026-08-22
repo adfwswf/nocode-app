@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>پلتفرم سازنده بدون کد</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background-color: #1A1A2E;
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+        header {
+            margin-top: 40px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        h1 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        p {
+            color: #a0a0b0;
+            font-size: 14px;
+        }
+        .cards-container {
+            width: 100%;
+            max-width: 400px;
+            margin-top: 40px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .card {
+            height: 140px;
+            border-radius: 20px;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: transform 0.2s;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+        .card:active {
+            transform: scale(0.98);
+        }
+        .card-text h2 {
+            font-size: 22px;
+            margin-bottom: 5px;
+        }
+        .card-text span {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        .card-icon {
+            font-size: 50px;
+            opacity: 0.9;
+        }
+        .bale-card {
+            background: linear-gradient(135deg, #6C5CE7, #A29BFE);
+        }
+        .app-card {
+            background: linear-gradient(135deg, #0984E3, #74B9FF);
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>پلتفرم سازنده</h1>
+        <p>چه چیزی می‌خوای بسازی؟</p>
+    </header>
+
+    <div class="cards-container">
+        <!-- دکمه ساخت بات بله -->
+        <div class="card bale-card" onclick="showMessage('بات بله')">
+            <div class="card-text">
+                <h2>ساخت بات بله</h2>
+                <span>بدون کدنویسی، هوشمند و سریع</span>
+            </div>
+            <div class="card-icon">🤖</div>
+        </div>
+
+        <!-- دکمه ساخت اپ موبایل -->
+        <div class="card app-card" onclick="showMessage('اپ موبایل')">
+            <div class="card-text">
+                <h2>ساخت اپ موبایل</h2>
+                <span>اپلیکیشن وب و اندروید</span>
+            </div>
+            <div class="card-icon">📱</div>
+        </div>
+    </div>
+
+    <script>
+        function showMessage(type) {
+            alert('روی ' + type + ' کلیک کردی! (بعداً اینجا صفحه جدید باز میشه)');
+        }
+    </script>
+
+</body>
+</html>
