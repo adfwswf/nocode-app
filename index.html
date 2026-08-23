@@ -86,8 +86,8 @@
 </div>
 
 <script>
-    // یک پل ارتباطی برای دور زدن محدودیت مرورگر موبایل (CORS)
-    const PROXY = 'https://corsproxy.io/?url=';
+    // پل ارتباطی جدید و پایدارتر برای دور زدن محدودیت
+    const PROXY = 'https://api.allorigins.win/raw?url=';
 
     // متغیرهای global
     let botToken = '';
@@ -105,8 +105,8 @@
         statusText.style.color = "#f39c12";
 
         try {
-            // استفاده از پل قبل از آدرس بله
             const baleUrl = `https://tapi.bale.ir/bot${token}/getMe`;
+            // استفاده از پل allorigins
             const res = await fetch(PROXY + encodeURIComponent(baleUrl));
             const data = await res.json();
 
@@ -143,19 +143,17 @@
         const btn = document.createElement('button');
         btn.className = 'glass-btn';
         btn.innerText = 'دکمه جدید';
-        btn.contentEditable = true; // کاربر بتونه اسم دکمه رو عوض کنه
+        btn.contentEditable = true;
         btn.style.outline = 'none';
         
-        // دکمه حذف
         const delBtn = document.createElement('span');
         delBtn.className = 'delete-btn-x';
         delBtn.innerText = '✖';
         delBtn.onclick = () => btnWrapper.remove();
 
-        // کادر تنظیم پیام ربات (وقتی روی دکمه کلیک شد)
         const setupDiv = document.createElement('div');
         setupDiv.className = 'response-setup';
-        setupDiv.style.display = 'none'; // مخفی اولیه
+        setupDiv.style.display = 'none';
         
         const label = document.createElement('label');
         label.innerText = 'وقتی کاربر این دکمه را زد، این پیام ارسال شود:';
@@ -171,10 +169,8 @@
         setupDiv.appendChild(label);
         setupDiv.appendChild(textarea);
 
-        // کلیک روی دکمه برای باز کردن کادر پاسخ
         btn.onclick = (e) => {
             if(e.detail === 1) {
-                // toggle نمایش کادر
                 setupDiv.style.display = setupDiv.style.display === 'none' ? 'block' : 'none';
             }
         };
@@ -209,12 +205,10 @@
                 for (let update of data.result) {
                     lastUpdateId = update.update_id + 1;
                     
-                    // اگه پیام /start بود
                     if(update.message && update.message.text === '/start') {
                         sendWelcomeMessage(update.message.chat.id);
                     }
                     
-                    // اگه روی دکمه شیشه‌ای کلیک شد (Callback Query)
                     if(update.callback_query) {
                         handleButtonClick(update.callback_query);
                     }
@@ -222,14 +216,13 @@
             }
         } catch (error) { console.error("Polling Error:", error); }
 
-        setTimeout(pollUpdates, 2000); // هر ۲ ثانیه چک کن
+        setTimeout(pollUpdates, 2000); 
     }
 
     // ۵. ارسال پیام اولیه و دکمه‌ها
     async function sendWelcomeMessage(chatId) {
         const welcomeText = document.getElementById('welcome-msg').innerText.trim() || "سلام!";
         
-        // ساخت کیبورد (دکمه‌ها)
         let keyboard = [];
         const buttons = document.querySelectorAll('#glass-buttons .glass-btn');
         buttons.forEach((btn, index) => {
@@ -250,22 +243,18 @@
     // ۶. پاسخ به کلیک روی دکمه‌ها
     async function handleButtonClick(callbackQuery) {
         const chatId = callbackQuery.message.chat.id;
-        const data = callbackQuery.data; // مثلا btn_0
+        const data = callbackQuery.data;
         
-        // پیدا کردن ایندسی که کاربر کلیک کرده
         const index = parseInt(data.split('_')[1]);
         const buttons = document.querySelectorAll('#glass-buttons .glass-btn');
         
         if(buttons[index]) {
-            // گرفتن متنی که کاربر برای این دکمه نوشته بود
             const setupDiv = buttons[index].nextElementSibling;
             const responseText = setupDiv.querySelector('textarea').value.trim() || "پاسخی تعریف نشده است.";
             
-            // ارسال پیام به بله
             const baleUrl = `https://tapi.bale.ir/bot${botToken}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(responseText)}`;
             await fetch(PROXY + encodeURIComponent(baleUrl));
             
-            // پاسخ به خود دکمه (مثل یک نوتیفیکیشن تو بله)
             const ansUrl = `https://tapi.bale.ir/bot${botToken}/answerCallbackQuery?callback_query_id=${callbackQuery.id}&text=انجام شد!`;
             await fetch(PROXY + encodeURIComponent(ansUrl));
         }
