@@ -103,9 +103,179 @@
     </div>
 
     <script>
-        function showMessage(type) {
-            alert('روی ' + type + ' کلیک کردی! (بعداً اینجا صفحه جدید باز میشه)');
+            // یک پل ارتباطی برای دور زدن محدودیت مرورگر موبایل
+    const PROXY = 'https://corsproxy.io/?url=';
+
+    // متغیرهای global
+    let botToken = '';
+    let lastUpdateId = 0;
+    let isPolling = false;
+
+    // ۱. اتصال به بله
+    async function connectBot() {
+        const token = document.getElementById('token-input').value.trim();
+        const statusText = document.getElementById('status-text');
+        
+        if(!token) { statusText.innerText = "لطفاً توکن را وارد کنید."; return; }
+        
+        statusText.innerText = "⏳ در حال بررسی توکن...";
+        statusText.style.color = "#f39c12";
+
+        try {
+            // استفاده از پل قبل از آدرس بله
+            const baleUrl = `https://tapi.bale.ir/bot${token}/getMe`;
+            const res = await fetch(PROXY + encodeURIComponent(baleUrl));
+            const data = await res.json();
+
+            if(data.ok) {
+                botToken = token;
+                document.getElementById('bot-name').innerText = data.result.first_name || "ربات من";
+                document.getElementById('bot-avatar').innerText = (data.result.first_name || "B").charAt(0);
+                
+                // تغییر صفحه
+                document.getElementById('token-screen').classList.remove('active');
+                document.getElementById('simulator-screen').classList.add('active');
+            } else {
+                statusText.innerText = "❌ توکن نامعتبر است یا بله دسترسی داده نیست.";
+                statusText.style.color = "#e74c3c";
+            }
+        } catch (error) {
+            statusText.innerText = "❌ خطا در اتصال. لطفاً دوباره تلاش کنید.";
+            statusText.style.color = "#e74c3c";
+            console.error(error);
         }
+    }
+
+    // ۲. ساخت دکمه شیشه‌ای
+    let btnCounter = 0;
+    function addGlassButton() {
+        btnCounter++;
+        const container = document.getElementById('glass-buttons');
+        
+        const btnWrapper = document.createElement('div');
+        btnWrapper.style.display = 'flex';
+        btnWrapper.style.flexDirection = 'column';
+        btnWrapper.style.width = '100%';
+
+        const btn = document.createElement('button');
+        btn.className = 'glass-btn';
+        btn.innerText = 'دکمه جدید';
+        btn.contentEditable = true;
+        btn.style.outline = 'none';
+        
+        const delBtn = document.createElement('span');
+        delBtn.className = 'delete-btn-x';
+        delBtn.innerText = '✖';
+        delBtn.onclick = () => btnWrapper.remove();
+
+        const setupDiv = document.createElement('div');
+        setupDiv.className = 'response-setup';
+        setupDiv.style.display = 'none';
+        
+        const label = document.createElement('label');
+        label.innerText = 'وقتی کاربر این دکمه را زد، این پیام ارسال شود:';
+        label.style.display = 'block';
+        label.style.marginBottom = '5px';
+        label.style.fontSize = '12px';
+        label.style.color = '#ccc';
+        
+        const textarea = document.createElement('textarea');
+        textarea.rows = 2;
+        textarea.placeholder = 'مثلاً: شما دکمه X را فشردید...';
+
+        setupDiv.appendChild(label);
+        setupDiv.appendChild(textarea);
+
+        btn.onclick = (e) => {
+            if(e.detail === 1) {
+                setupDiv.style.display = setupDiv.style.display === 'none' ? 'block' : 'none';
+            }
+        };
+
+        btn.appendChild(delBtn);
+        btnWrapper.appendChild(btn);
+        btnWrapper.appendChild(setupDiv);
+        container.appendChild(btnWrapper);
+    }
+
+    // ۳. ذخیره و روشن کردن ربات
+    function saveAndStartBot() {
+        if (isPolling) {
+            alert("ربات از قبل روشن است و منتظر دریافت /start است.");
+            return;
+        }
+        isPolling = true;
+        alert("✅ ربات روشن شد! حالا به بله بروید و /start را بفرستید.\n(این صفحه نباید بسته شود)");
+        pollUpdates();
+    }
+
+    // ۴. دریافت پیام‌ها از بله (Long Polling)
+    async function pollUpdates() {
+        if (!isPolling) return;
+        
+        try {
+            const baleUrl = `https://tapi.bale.ir/bot${botToken}/getUpdates?offset=${lastUpdateId}&timeout=30`;
+            const res = await fetch(PROXY + encodeURIComponent(baleUrl));
+            const data = await res.json();
+
+            if(data.ok) {
+                for (let update of data.result) {
+                    lastUpdateId = update.update_id + 1;
+                    
+                    if(update.message && update.message.text === '/start') {
+                        sendWelcomeMessage(update.message.chat.id);
+                    }
+                    
+                    if(update.callback_query) {
+                        handleButtonClick(update.callback_query);
+                    }
+                }
+            }
+        } catch (error) { console.error("Polling Error:", error); }
+
+        setTimeout(pollUpdates, 2000); // هر ۲ ثانیه چک کن
+    }
+
+    // ۵. ارسال پیام اولیه و دکمه‌ها
+    async function sendWelcomeMessage(chatId) {
+        const welcomeText = document.getElementById('welcome-msg').innerText.trim() || "سلام!";
+        
+        let keyboard = [];
+        const buttons = document.querySelectorAll('#glass-buttons .glass-btn');
+        buttons.forEach((btn, index) => {
+            const text = btn.innerText.replace('✖', '').trim();
+            if(text) {
+                keyboard.push([{ text: text, callback_data: `btn_${index}` }]);
+            }
+        });
+
+        let replyMarkup = keyboard.length > 0 ? JSON.stringify({ inline_keyboard: keyboard }) : null;
+
+        let baleUrl = `https://tapi.bale.ir/bot${botToken}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(welcomeText)}`;
+        if(replyMarkup) baleUrl += `&reply_markup=${encodeURIComponent(replyMarkup)}`;
+
+        await fetch(PROXY + encodeURIComponent(baleUrl));
+    }
+
+    // ۶. پاسخ به کلیک روی دکمه‌ها
+    async function handleButtonClick(callbackQuery) {
+        const chatId = callbackQuery.message.chat.id;
+        const data = callbackQuery.data;
+        
+        const index = parseInt(data.split('_')[1]);
+        const buttons = document.querySelectorAll('#glass-buttons .glass-btn');
+        
+        if(buttons[index]) {
+            const setupDiv = buttons[index].nextElementSibling;
+            const responseText = setupDiv.querySelector('textarea').value.trim() || "پاسخی تعریف نشده است.";
+            
+            const baleUrl = `https://tapi.bale.ir/bot${botToken}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(responseText)}`;
+            await fetch(PROXY + encodeURIComponent(baleUrl));
+            
+            const ansUrl = `https://tapi.bale.ir/bot${botToken}/answerCallbackQuery?callback_query_id=${callbackQuery.id}&text=انجام شد!`;
+            await fetch(PROXY + encodeURIComponent(ansUrl));
+        }
+            }
     </script>
 
 </body>
