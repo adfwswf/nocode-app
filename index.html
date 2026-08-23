@@ -3,107 +3,90 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>پلتفرم سازنده بدون کد</title>
+    <title>پلتفرم سازنده بات بله</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        body {
-            background-color: #1A1A2E;
-            color: white;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 20px;
-        }
-        header {
-            margin-top: 40px;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-        h1 {
-            font-size: 24px;
-            margin-bottom: 10px;
-        }
-        p {
-            color: #a0a0b0;
-            font-size: 14px;
-        }
-        .cards-container {
-            width: 100%;
-            max-width: 400px;
-            margin-top: 40px;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-        .card {
-            height: 140px;
-            border-radius: 20px;
-            padding: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            cursor: pointer;
-            transition: transform 0.2s;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
-        }
-        .card:active {
-            transform: scale(0.98);
-        }
-        .card-text h2 {
-            font-size: 22px;
-            margin-bottom: 5px;
-        }
-        .card-text span {
-            font-size: 14px;
-            opacity: 0.9;
-        }
-        .card-icon {
-            font-size: 50px;
-            opacity: 0.9;
-        }
-        .bale-card {
-            background: linear-gradient(135deg, #6C5CE7, #A29BFE);
-        }
-        .app-card {
-            background: linear-gradient(135deg, #0984E3, #74B9FF);
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, sans-serif; }
+        body { background-color: #0f0f1a; color: white; display: flex; justify-content: center; min-height: 100vh; }
+        .app-container { width: 100%; max-width: 450px; background-color: #17212b; min-height: 100vh; position: relative; display: flex; flex-direction: column; }
+        
+        /* صفحات */
+        .screen { display: none; flex-direction: column; flex: 1; }
+        .screen.active { display: flex; }
+
+        /* صفحه توکن */
+        #token-screen { justify-content: center; align-items: center; padding: 20px; text-align: center; }
+        #token-screen h1 { color: #5fc9f8; margin-bottom: 20px; }
+        #token-screen input { width: 100%; padding: 15px; border-radius: 10px; border: 1px solid #2c3e50; background: #0e1621; color: white; margin-bottom: 15px; }
+        .btn-primary { width: 100%; padding: 15px; border: none; border-radius: 10px; background: linear-gradient(135deg, #5fc9f8, #1a73e8); color: white; font-weight: bold; cursor: pointer; }
+        #status-text { margin-top: 15px; color: #e74c3c; font-size: 14px; }
+
+        /* صفحه شبیه ساز بله */
+        .chat-header { background: #17212b; padding: 15px; display: flex; align-items: center; border-bottom: 1px solid #0e1621; box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 10; }
+        .chat-header .avatar { width: 40px; height: 40px; background: #5fc9f8; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin-left: 10px; font-weight: bold; color: #17212b; }
+        .chat-header h3 { font-size: 16px; color: white; }
+        .chat-header span { font-size: 12px; color: #27c93f; }
+
+        .chat-area { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; background-color: #0e1621; }
+        
+        .message-bubble { background: #ffffff; color: #000000; padding: 10px 15px; border-radius: 12px 12px 12px 0; max-width: 80%; align-self: flex-start; box-shadow: 0 2px 5px rgba(0,0,0,0.1); font-size: 14px; }
+        .message-bubble.editable { outline: 2px dashed #5fc9f8; cursor: text; }
+        .message-bubble.editable:empty:before { content: attr(data-placeholder); color: #aaa; }
+        
+        /* دکمه‌های شیشه‌ای */
+        .glass-buttons-container { display: flex; flex-wrap: wrap; gap: 10px; align-self: flex-start; max-width: 80%; }
+        .glass-btn { background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(5px); border: 1px solid rgba(255, 255, 255, 0.3); color: #5fc9f8; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-size: 13px; transition: 0.2s; position: relative; }
+        .glass-btn:hover { background: rgba(255, 255, 255, 0.25); }
+        .glass-btn .delete-btn-x { position: absolute; top: -5px; right: -5px; background: #e74c3c; border-radius: 50%; width: 15px; height: 15px; font-size: 10px; display: none; justify-content: center; align-items: center; color: white; }
+        .glass-btn:hover .delete-btn-x { display: flex; }
+
+        .response-setup { background: rgba(0, 0, 0, 0.3); border: 1px solid #5fc9f8; padding: 10px; border-radius: 8px; margin-top: 5px; width: 100%; }
+        .response-setup textarea { width: 100%; background: #0e1621; border: 1px solid #2c3e50; color: white; border-radius: 5px; padding: 8px; font-size: 13px; resize: none; }
+
+        .chat-footer { padding: 15px; background: #17212b; border-top: 1px solid #0e1621; }
+        .chat-footer button { background: transparent; border: 1px dashed #5fc9f8; color: #5fc9f8; padding: 10px; border-radius: 10px; width: 100%; cursor: pointer; }
+        .chat-footer .btn-save { background: #27c93f; color: white; border: none; margin-top: 10px; font-weight: bold; }
+
     </style>
 </head>
 <body>
 
-    <header>
-        <h1>پلتفرم سازنده</h1>
-        <p>چه چیزی می‌خوای بسازی؟</p>
-    </header>
-
-    <div class="cards-container">
-        <!-- دکمه ساخت بات بله -->
-        <div class="card bale-card" onclick="showMessage('بات بله')">
-            <div class="card-text">
-                <h2>ساخت بات بله</h2>
-                <span>بدون کدنویسی، هوشمند و سریع</span>
-            </div>
-            <div class="card-icon">🤖</div>
-        </div>
-
-        <!-- دکمه ساخت اپ موبایل -->
-        <div class="card app-card" onclick="showMessage('اپ موبایل')">
-            <div class="card-text">
-                <h2>ساخت اپ موبایل</h2>
-                <span>اپلیکیشن وب و اندروید</span>
-            </div>
-            <div class="card-icon">📱</div>
-        </div>
+<div class="app-container">
+    <!-- صفحه ورود توکن -->
+    <div id="token-screen" class="screen active">
+        <h1>🤖 اتصال به بات بله</h1>
+        <p style="color: #aaa; margin-bottom: 30px; font-size: 14px;">برای شروع، توکن ربات خود را از Bot Father بله دریافت و وارد کنید.</p>
+        <input type="text" id="token-input" placeholder="123456789:ABCdefGhi...">
+        <button class="btn-primary" onclick="connectBot()">اتصال به ربات</button>
+        <div id="status-text"></div>
     </div>
 
-    <script>
-            // یک پل ارتباطی برای دور زدن محدودیت مرورگر موبایل
+    <!-- صفحه شبیه ساز بله -->
+    <div id="simulator-screen" class="screen">
+        <div class="chat-header">
+            <div class="avatar" id="bot-avatar">B</div>
+            <div>
+                <h3 id="bot-name">ربات من</h3>
+                <span>● آنلاین (در حال تست)</span>
+            </div>
+        </div>
+
+        <div class="chat-area" id="chat-area">
+            <!-- پیام اولیه -->
+            <div class="message-bubble editable" id="welcome-msg" contenteditable="true" data-placeholder="پیام اولیه ربات را اینجا بنویسید... (مثلاً: سلام خوش اومدی!)"></div>
+            
+            <!-- دکمه‌های شیشه‌ای اینجا اضافه می‌شوند -->
+            <div class="glass-buttons-container" id="glass-buttons"></div>
+        </div>
+
+        <div class="chat-footer">
+            <button onclick="addGlassButton()">➕ افزودن دکمه شیشه‌ای</button>
+            <button class="btn-save" onclick="saveAndStartBot()">✅ ذخیره و روشن کردن ربات</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // یک پل ارتباطی برای دور زدن محدودیت مرورگر موبایل (CORS)
     const PROXY = 'https://corsproxy.io/?url=';
 
     // متغیرهای global
@@ -160,17 +143,19 @@
         const btn = document.createElement('button');
         btn.className = 'glass-btn';
         btn.innerText = 'دکمه جدید';
-        btn.contentEditable = true;
+        btn.contentEditable = true; // کاربر بتونه اسم دکمه رو عوض کنه
         btn.style.outline = 'none';
         
+        // دکمه حذف
         const delBtn = document.createElement('span');
         delBtn.className = 'delete-btn-x';
         delBtn.innerText = '✖';
         delBtn.onclick = () => btnWrapper.remove();
 
+        // کادر تنظیم پیام ربات (وقتی روی دکمه کلیک شد)
         const setupDiv = document.createElement('div');
         setupDiv.className = 'response-setup';
-        setupDiv.style.display = 'none';
+        setupDiv.style.display = 'none'; // مخفی اولیه
         
         const label = document.createElement('label');
         label.innerText = 'وقتی کاربر این دکمه را زد، این پیام ارسال شود:';
@@ -186,8 +171,10 @@
         setupDiv.appendChild(label);
         setupDiv.appendChild(textarea);
 
+        // کلیک روی دکمه برای باز کردن کادر پاسخ
         btn.onclick = (e) => {
             if(e.detail === 1) {
+                // toggle نمایش کادر
                 setupDiv.style.display = setupDiv.style.display === 'none' ? 'block' : 'none';
             }
         };
@@ -214,18 +201,20 @@
         if (!isPolling) return;
         
         try {
-            const baleUrl = `https://tapi.bale.ir/bot${botToken}/getUpdates?offset=${lastUpdateId}&timeout=30`;
-            const res = await fetch(PROXY + encodeURIComponent(baleUrl));
+            const url = `https://tapi.bale.ir/bot${botToken}/getUpdates?offset=${lastUpdateId}&timeout=30`;
+            const res = await fetch(PROXY + encodeURIComponent(url));
             const data = await res.json();
 
             if(data.ok) {
                 for (let update of data.result) {
                     lastUpdateId = update.update_id + 1;
                     
+                    // اگه پیام /start بود
                     if(update.message && update.message.text === '/start') {
                         sendWelcomeMessage(update.message.chat.id);
                     }
                     
+                    // اگه روی دکمه شیشه‌ای کلیک شد (Callback Query)
                     if(update.callback_query) {
                         handleButtonClick(update.callback_query);
                     }
@@ -240,6 +229,7 @@
     async function sendWelcomeMessage(chatId) {
         const welcomeText = document.getElementById('welcome-msg').innerText.trim() || "سلام!";
         
+        // ساخت کیبورد (دکمه‌ها)
         let keyboard = [];
         const buttons = document.querySelectorAll('#glass-buttons .glass-btn');
         buttons.forEach((btn, index) => {
@@ -260,23 +250,27 @@
     // ۶. پاسخ به کلیک روی دکمه‌ها
     async function handleButtonClick(callbackQuery) {
         const chatId = callbackQuery.message.chat.id;
-        const data = callbackQuery.data;
+        const data = callbackQuery.data; // مثلا btn_0
         
+        // پیدا کردن ایندسی که کاربر کلیک کرده
         const index = parseInt(data.split('_')[1]);
         const buttons = document.querySelectorAll('#glass-buttons .glass-btn');
         
         if(buttons[index]) {
+            // گرفتن متنی که کاربر برای این دکمه نوشته بود
             const setupDiv = buttons[index].nextElementSibling;
             const responseText = setupDiv.querySelector('textarea').value.trim() || "پاسخی تعریف نشده است.";
             
+            // ارسال پیام به بله
             const baleUrl = `https://tapi.bale.ir/bot${botToken}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(responseText)}`;
             await fetch(PROXY + encodeURIComponent(baleUrl));
             
+            // پاسخ به خود دکمه (مثل یک نوتیفیکیشن تو بله)
             const ansUrl = `https://tapi.bale.ir/bot${botToken}/answerCallbackQuery?callback_query_id=${callbackQuery.id}&text=انجام شد!`;
             await fetch(PROXY + encodeURIComponent(ansUrl));
         }
-            }
-    </script>
+    }
+</script>
 
 </body>
 </html>
