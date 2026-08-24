@@ -1,5 +1,7 @@
 let selectedElement = null, currentEditEl = null, elCounter = 0, prevState = null, isCreating = false, currentType = null, currentUploadSrc = null;
-let isDragging = false, isPinching = false, startX, startY, startLeft, startTop, initialDist = 0, startW = 0, startH = 0, hasDragged = false;
+let isDragging = false, isPinching = false, startX, startY, startLeft, startTop, initialDist = 0, startW = 0, startH = 0, startFontSize = 16, hasDragged = false;
+let isCreatingPage = false;
+
 let pages = [{ id: 1, name: "صفحه اصلی", bg: "#0e1621" }];
 let selectedPageId = 1;
 
@@ -13,25 +15,48 @@ function renderPages() {
         list.appendChild(item);
     });
 }
+function prepareNewPage() {
+    isCreatingPage = true;
+    document.getElementById('page-name').value = "صفحه " + (pages.length + 1);
+    document.getElementById('page-bg-color').value = "#1a1a2e";
+    document.getElementById('page-create').style.display = 'block';
+    document.getElementById('page-delete').style.display = 'none';
+    showView('view-page-settings');
+}
+function createPageFromSettings() {
+    const newId = Date.now();
+    const name = document.getElementById('page-name').value || "صفحه جدید";
+    const bg = document.getElementById('page-bg-color').value;
+    pages.push({ id: newId, name: name, bg: bg });
+    renderPages();
+    selectPage(newId);
+    isCreatingPage = false;
+}
 function selectPage(id) {
     selectedPageId = id;
     const p = pages.find(x => x.id === id); if(!p) return;
     document.getElementById('canvas').style.backgroundColor = p.bg;
     document.getElementById('page-name').value = p.name;
     document.getElementById('page-bg-color').value = p.bg;
+    isCreatingPage = false;
+    document.getElementById('page-create').style.display = 'none';
+    document.getElementById('page-delete').style.display = 'block';
     showView('view-page-settings');
 }
 function updatePageData() {
+    if(isCreatingPage) return;
     const p = pages.find(x => x.id === selectedPageId); if(!p) return;
     p.name = document.getElementById('page-name').value;
     p.bg = document.getElementById('page-bg-color').value;
     document.getElementById('canvas').style.backgroundColor = p.bg;
     renderPages(); populatePageLinks();
 }
-function addNewPage() {
-    const newId = Date.now();
-    pages.push({ id: newId, name: "صفحه " + (pages.length + 1), bg: "#1a1a2e" });
-    renderPages(); selectPage(newId);
+function deleteSelectedPage() {
+    if(pages.length <= 1) { alert("شما باید حداقل یک صفحه داشته باشید!"); return; }
+    const pageIndex = pages.findIndex(x => x.id === selectedPageId);
+    pages.splice(pageIndex, 1);
+    renderPages(); populatePageLinks();
+    selectPage(pages[0].id);
 }
 
 // --- ناوبری ---
@@ -156,7 +181,7 @@ function applySettingsToElement(el) {
         el.style.background = 'transparent'; el.style.border = 'none';
     } else if(type === 'input') {
         const ph = document.getElementById('in-placeholder').value;
-        content.innerHTML = `<input type="text" placeholder="${ph}" style="width: 100%; height: 100%; background: transparent; border: none; color: white; font-family: 'Vazirmatn'; outline: none; pointer-events: none;" disabled>`;
+        content.innerHTML = `<input type="text" placeholder="${ph}" style="width: 100%; height: 100%; background: transparent; border: none; color: white; font-family: 'Vazirmatn'; outline: none; pointer-events: none; padding: 0 10px;" disabled>`;
         el.style.width = document.getElementById('in-width').value + 'px';
         el.style.height = document.getElementById('in-height').value + 'px';
         el.style.background = document.getElementById('in-bg-color').value;
@@ -174,7 +199,12 @@ function deselectAllElements() {
 }
 function lockElement(el) { el.classList.remove('edit-mode'); el.classList.add('locked'); const t = el.querySelector('.btn-toolbar'); if(t) t.remove(); currentEditEl = null; prevState = null; }
 function cancelEdit(el) {
-    if(prevState) { el.style.top = prevState.top; el.style.left = prevState.left; el.style.width = prevState.width; el.style.height = prevState.height; lockElement(el); selectLockedElement(el); }
+    if(prevState) { 
+        el.style.top = prevState.top; el.style.left = prevState.left; 
+        el.style.width = prevState.width; el.style.height = prevState.height; 
+        if(prevState.fontSize) el.style.fontSize = prevState.fontSize + 'px';
+        lockElement(el); selectLockedElement(el); 
+    }
     else { el.remove(); selectedElement = null; currentEditEl = null; }
 }
 function selectLockedElement(el) {
@@ -185,7 +215,8 @@ function selectLockedElement(el) {
     el.appendChild(toolbar);
 }
 function enableEditMode(el) {
-    deselectAllElements(); prevState = { top: el.style.top, left: el.style.left, width: el.style.width, height: el.style.height };
+    deselectAllElements(); 
+    prevState = { top: el.style.top, left: el.style.left, width: el.style.width, height: el.style.height, fontSize: parseInt(el.style.fontSize) || 16 };
     el.classList.add('edit-mode'); el.classList.remove('locked', 'selected'); currentEditEl = el; loadSettingsForElement(el);
     const toolbar = document.createElement('div'); toolbar.className = 'btn-toolbar';
     toolbar.appendChild(createToolBtn('confirm', '✔️', () => lockElement(el)));
@@ -264,7 +295,12 @@ function updateExistingLists() {
             else if(type === 'switch') item.innerText = 'سوئیچ: ' + (content.querySelector('span')?.innerText || '');
             else if(type === 'input') item.innerText = 'فیلد: ' + (content.querySelector('input')?.placeholder || '');
             else item.innerText = 'تصویر ' + (i+1);
-            item.onclick = () => { loadSettingsForElement(el); openDrawer(); };
+            // اینجا تغییر کرد: انتخاب المان و رفتن به تنظیمات
+            item.onclick = () => { 
+                selectLockedElement(el); 
+                loadSettingsForElement(el); 
+                openDrawer(); 
+            };
             list.appendChild(item);
         });
     }
@@ -286,55 +322,4 @@ function createToolBtn(type, icon, callback) {
 function initInteractions(el) {
     el.addEventListener('click', (e) => {
         if (hasDragged) { hasDragged = false; return; }
-        if (el.classList.contains('locked') && !e.target.classList.contains('tool-btn')) selectLockedElement(el);
-    });
-}
-
-const canvas = document.getElementById('canvas');
-canvas.addEventListener('touchstart', (e) => {
-    if (e.target.classList.contains('tool-btn')) return; if (!currentEditEl) return; e.preventDefault();
-    if (e.touches.length === 1) {
-        isDragging = true; isPinching = false; hasDragged = false;
-        startX = e.touches[0].clientX; startY = e.touches[0].clientY; startLeft = currentEditEl.offsetLeft; startTop = currentEditEl.offsetTop;
-    } else if (e.touches.length === 2) {
-        isDragging = false; isPinching = true; hasDragged = true; initialDist = getDistance(e.touches[0], e.touches[1]);
-        startW = currentEditEl.offsetWidth; startH = currentEditEl.offsetHeight;
-    }
-}, { passive: false });
-
-canvas.addEventListener('touchmove', (e) => {
-    if (!currentEditEl) return;
-    if (isPinching && e.touches.length === 2) {
-        e.preventDefault(); let scale = getDistance(e.touches[0], e.touches[1]) / initialDist;
-        let newW = Math.max(40, startW * scale); let newH = Math.max(30, startH * scale);
-        currentEditEl.style.width = newW + 'px'; currentEditEl.style.height = newH + 'px';
-        if(selectedElement === currentEditEl) {
-            const type = currentEditEl.getAttribute('data-type');
-            if(type === 'button') { document.getElementById('btn-width').value = Math.round(newW); document.getElementById('btn-height').value = Math.round(newH); }
-            else if(type === 'image') { document.getElementById('img-width').value = Math.round(newW); document.getElementById('img-height').value = Math.round(newH); }
-            else if(type === 'input') { document.getElementById('in-width').value = Math.round(newW); document.getElementById('in-height').value = Math.round(newH); }
-        }
-    } else if (isDragging && e.touches.length === 1) {
-        e.preventDefault(); hasDragged = true;
-        currentEditEl.style.left = (startLeft + e.touches[0].clientX - startX) + 'px';
-        currentEditEl.style.top = (startTop + e.touches[0].clientY - startY) + 'px';
-    }
-}, { passive: false });
-
-canvas.addEventListener('touchend', () => { isDragging = false; isPinching = false; });
-
-canvas.addEventListener('mousedown', (e) => {
-    if (e.target.classList.contains('tool-btn')) return; if (!currentEditEl) return;
-    isDragging = true; hasDragged = false; startX = e.clientX; startY = e.clientY; startLeft = currentEditEl.offsetLeft; startTop = currentEditEl.offsetTop;
-});
-document.addEventListener('mousemove', (e) => {
-    if (isDragging && currentEditEl) {
-        hasDragged = true; currentEditEl.style.left = (startLeft + e.clientX - startX) + 'px'; currentEditEl.style.top = (startTop + e.clientY - startY) + 'px';
-    }
-});
-document.addEventListener('mouseup', () => { setTimeout(() => hasDragged = false, 100); isDragging = false; });
-canvas.addEventListener('click', (e) => { if(e.target.id === 'canvas') deselectAllElements(); });
-
-function getDistance(t1, t2) { const dx = t1.clientX - t2.clientX; const dy = t1.clientY - t2.clientY; return Math.sqrt(dx * dx + dy * dy); }
-function rgbToHex(rgb) { if(!rgb || rgb.startsWith('#')) return rgb || '#5fc9f8'; const p = rgb.match(/\d+/g); if(!p) return '#5fc9f8'; return '#' + p.map(x => parseInt(x).toString(16).padStart(2, '0')).join(''); }
-function isDark(hex) { if(!hex) return false; const c = hex.substring(1), rgb = parseInt(c, 16), r = (rgb >> 16) & 0xff, g = (rgb >> 8) & 0xff, b = (rgb >> 0) & 0xff; return (0.2126*r + 0.7152*g + 0.0722*b) < 128; }
+        if (el
