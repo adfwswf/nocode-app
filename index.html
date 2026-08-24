@@ -49,13 +49,15 @@
             <!-- صفحات -->
             <div id="view-pages" class="drawer-view">
                 <button class="back-btn" onclick="showView('view-main')">⟵ بازگشت</button>
-                <button class="btn-add" onclick="addNewPage()">➕ ساخت صفحه جدید</button>
+                <button class="btn-add" onclick="prepareNewPage()">➕ ساخت صفحه جدید</button>
                 <div id="existing-pages"></div>
             </div>
             <div id="view-page-settings" class="drawer-view">
                 <button class="back-btn" onclick="showView('view-pages')">⟵ بازگشت</button>
                 <div class="form-group"><label>نام صفحه</label><input type="text" id="page-name" class="form-control" oninput="updatePageData()"></div>
                 <div class="form-group"><label>رنگ پس‌زمینه صفحه</label><input type="color" id="page-bg-color" class="color-input" onchange="updatePageData()"></div>
+                <button class="btn-save" id="page-create" style="display:none;" onclick="createPageFromSettings()">✅ ساخت صفحه</button>
+                <button class="btn-danger" id="page-delete" onclick="deleteSelectedPage()">🗑 حذف این صفحه</button>
             </div>
 
             <!-- دکمه‌ها -->
