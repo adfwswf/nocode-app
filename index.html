@@ -24,7 +24,8 @@
         <div class="builder-header">
             <button class="header-btn" onclick="goToHome()">⟵</button>
             <h3>محیط طراحی اپ</h3>
-            <button class="header-btn" onclick="openDrawer()">⚙️</button>
+            <!-- تغییر اینجا صورت گرفت -->
+            <button class="header-btn" onclick="showView('view-main'); openDrawer();">⚙️</button>
         </div>
         <div class="canvas-area" id="canvas"></div>
     </div>
@@ -217,6 +218,7 @@
     </div>
 </div>
 
+<!-- مطمئن شو اسم فایل دقیقاً script.js باشه -->
 <script src="script.js"></script>
 </body>
 </html>
