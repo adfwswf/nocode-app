@@ -62,7 +62,9 @@ function deleteSelectedPage() {
 // --- ناوبری ---
 function goToBuilder() { document.getElementById('home-screen').classList.remove('active'); document.getElementById('builder-screen').classList.add('active'); renderPages(); populatePageLinks(); }
 function goToHome() { document.getElementById('builder-screen').classList.remove('active'); document.getElementById('home-screen').classList.add('active'); }
-function openDrawer() { document.getElementById('drawer').classList.add('active'); document.getElementById('overlay').classList.add('active'); showView('view-main'); }
+
+// اینجا تغییر کرد: دیگه به زور نمیره تو view-main
+function openDrawer() { document.getElementById('drawer').classList.add('active'); document.getElementById('overlay').classList.add('active'); }
 function hideDrawer() { document.getElementById('drawer').classList.remove('active'); document.getElementById('overlay').classList.remove('active'); }
 function closeDrawerAndDeselect() { hideDrawer(); if (currentEditEl) lockElement(currentEditEl); deselectAllElements(); }
 function showView(viewId) {
@@ -211,6 +213,7 @@ function selectLockedElement(el) {
     deselectAllElements(); el.classList.add('selected');
     const toolbar = document.createElement('div'); toolbar.className = 'btn-toolbar';
     toolbar.appendChild(createToolBtn('edit', '✏️', () => enableEditMode(el)));
+    // اینجا تغییر کرد: وقتی تنظیمات رو میزنم، اول لود کن بعد نوار رو بیار
     toolbar.appendChild(createToolBtn('settings', '⚙️', () => { loadSettingsForElement(el); openDrawer(); }));
     el.appendChild(toolbar);
 }
@@ -295,7 +298,6 @@ function updateExistingLists() {
             else if(type === 'switch') item.innerText = 'سوئیچ: ' + (content.querySelector('span')?.innerText || '');
             else if(type === 'input') item.innerText = 'فیلد: ' + (content.querySelector('input')?.placeholder || '');
             else item.innerText = 'تصویر ' + (i+1);
-            // اینجا تغییر کرد: انتخاب المان و رفتن به تنظیمات
             item.onclick = () => { 
                 selectLockedElement(el); 
                 loadSettingsForElement(el); 
@@ -322,4 +324,62 @@ function createToolBtn(type, icon, callback) {
 function initInteractions(el) {
     el.addEventListener('click', (e) => {
         if (hasDragged) { hasDragged = false; return; }
-        if (el
+        if (el.classList.contains('locked') && !e.target.classList.contains('tool-btn')) selectLockedElement(el);
+    });
+}
+
+const canvas = document.getElementById('canvas');
+canvas.addEventListener('touchstart', (e) => {
+    if (e.target.classList.contains('tool-btn')) return; if (!currentEditEl) return; e.preventDefault();
+    if (e.touches.length === 1) {
+        isDragging = true; isPinching = false; hasDragged = false;
+        startX = e.touches[0].clientX; startY = e.touches[0].clientY; startLeft = currentEditEl.offsetLeft; startTop = currentEditEl.offsetTop;
+    } else if (e.touches.length === 2) {
+        isDragging = false; isPinching = true; hasDragged = true; initialDist = getDistance(e.touches[0], e.touches[1]);
+        startW = currentEditEl.offsetWidth; startH = currentEditEl.offsetHeight;
+        startFontSize = parseInt(currentEditEl.style.fontSize) || 16;
+    }
+}, { passive: false });
+
+canvas.addEventListener('touchmove', (e) => {
+    if (!currentEditEl) return;
+    if (isPinching && e.touches.length === 2) {
+        e.preventDefault(); let scale = getDistance(e.touches[0], e.touches[1]) / initialDist;
+        const type = currentEditEl.getAttribute('data-type');
+        if(type === 'text') {
+            let newSize = Math.max(8, startFontSize * scale);
+            currentEditEl.style.fontSize = newSize + 'px';
+            if(selectedElement === currentEditEl) document.getElementById('txt-size').value = Math.round(newSize);
+        } else {
+            let newW = Math.max(40, startW * scale); let newH = Math.max(30, startH * scale);
+            currentEditEl.style.width = newW + 'px'; currentEditEl.style.height = newH + 'px';
+            if(selectedElement === currentEditEl) {
+                if(type === 'button') { document.getElementById('btn-width').value = Math.round(newW); document.getElementById('btn-height').value = Math.round(newH); }
+                else if(type === 'image') { document.getElementById('img-width').value = Math.round(newW); document.getElementById('img-height').value = Math.round(newH); }
+                else if(type === 'input') { document.getElementById('in-width').value = Math.round(newW); document.getElementById('in-height').value = Math.round(newH); }
+            }
+        }
+    } else if (isDragging && e.touches.length === 1) {
+        e.preventDefault(); hasDragged = true;
+        currentEditEl.style.left = (startLeft + e.touches[0].clientX - startX) + 'px';
+        currentEditEl.style.top = (startTop + e.touches[0].clientY - startY) + 'px';
+    }
+}, { passive: false });
+
+canvas.addEventListener('touchend', () => { isDragging = false; isPinching = false; });
+
+canvas.addEventListener('mousedown', (e) => {
+    if (e.target.classList.contains('tool-btn')) return; if (!currentEditEl) return;
+    isDragging = true; hasDragged = false; startX = e.clientX; startY = e.clientY; startLeft = currentEditEl.offsetLeft; startTop = currentEditEl.offsetTop;
+});
+document.addEventListener('mousemove', (e) => {
+    if (isDragging && currentEditEl) {
+        hasDragged = true; currentEditEl.style.left = (startLeft + e.clientX - startX) + 'px'; currentEditEl.style.top = (startTop + e.clientY - startY) + 'px';
+    }
+});
+document.addEventListener('mouseup', () => { setTimeout(() => hasDragged = false, 100); isDragging = false; });
+canvas.addEventListener('click', (e) => { if(e.target.id === 'canvas') deselectAllElements(); });
+
+function getDistance(t1, t2) { const dx = t1.clientX - t2.clientX; const dy = t1.clientY - t2.clientY; return Math.sqrt(dx * dx + dy * dy); }
+function rgbToHex(rgb) { if(!rgb || rgb.startsWith('#')) return rgb || '#5fc9f8'; const p = rgb.match(/\d+/g); if(!p) return '#5fc9f8'; return '#' + p.map(x => parseInt(x).toString(16).padStart(2, '0')).join(''); }
+function isDark(hex) { if(!hex) return false; const c = hex.substring(1), rgb = parseInt(c, 16), r = (rgb >> 16) & 0xff, g = (rgb >> 8) & 0xff, b = (rgb >> 0) & 0xff; return (0.2126*r + 0.7152*g + 0.0722*b) < 128; }
