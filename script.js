@@ -1,6 +1,5 @@
 let selectedElement = null, currentEditEl = null, elCounter = 0, prevState = null, isCreating = false, currentType = null, currentUploadSrc = null;
 let isDragging = false, isPinching = false, startX, startY, startLeft, startTop, initialDist = 0, startW = 0, startH = 0, hasDragged = false;
-alert('سلام! جاوااسکریپت با موفقیت لود شد!');
 let pages = [{ id: 1, name: "صفحه اصلی", bg: "#0e1621" }];
 let selectedPageId = 1;
 
