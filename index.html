@@ -2,264 +2,219 @@
 <html lang="fa" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>پلتفرم سازنده بات بله</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, sans-serif; }
-        body { background-color: #0f0f1a; color: white; display: flex; justify-content: center; min-height: 100vh; }
-        .app-container { width: 100%; max-width: 450px; background-color: #17212b; min-height: 100vh; position: relative; display: flex; flex-direction: column; }
-        
-        /* صفحات */
-        .screen { display: none; flex-direction: column; flex: 1; }
-        .screen.active { display: flex; }
-
-        /* صفحه توکن */
-        #token-screen { justify-content: center; align-items: center; padding: 20px; text-align: center; }
-        #token-screen h1 { color: #5fc9f8; margin-bottom: 20px; }
-        #token-screen input { width: 100%; padding: 15px; border-radius: 10px; border: 1px solid #2c3e50; background: #0e1621; color: white; margin-bottom: 15px; }
-        .btn-primary { width: 100%; padding: 15px; border: none; border-radius: 10px; background: linear-gradient(135deg, #5fc9f8, #1a73e8); color: white; font-weight: bold; cursor: pointer; }
-        #status-text { margin-top: 15px; color: #e74c3c; font-size: 14px; }
-
-        /* صفحه شبیه ساز بله */
-        .chat-header { background: #17212b; padding: 15px; display: flex; align-items: center; border-bottom: 1px solid #0e1621; box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 10; }
-        .chat-header .avatar { width: 40px; height: 40px; background: #5fc9f8; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin-left: 10px; font-weight: bold; color: #17212b; }
-        .chat-header h3 { font-size: 16px; color: white; }
-        .chat-header span { font-size: 12px; color: #27c93f; }
-
-        .chat-area { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; background-color: #0e1621; }
-        
-        .message-bubble { background: #ffffff; color: #000000; padding: 10px 15px; border-radius: 12px 12px 12px 0; max-width: 80%; align-self: flex-start; box-shadow: 0 2px 5px rgba(0,0,0,0.1); font-size: 14px; }
-        .message-bubble.editable { outline: 2px dashed #5fc9f8; cursor: text; }
-        .message-bubble.editable:empty:before { content: attr(data-placeholder); color: #aaa; }
-        
-        /* دکمه‌های شیشه‌ای */
-        .glass-buttons-container { display: flex; flex-wrap: wrap; gap: 10px; align-self: flex-start; max-width: 80%; }
-        .glass-btn { background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(5px); border: 1px solid rgba(255, 255, 255, 0.3); color: #5fc9f8; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-size: 13px; transition: 0.2s; position: relative; }
-        .glass-btn:hover { background: rgba(255, 255, 255, 0.25); }
-        .glass-btn .delete-btn-x { position: absolute; top: -5px; right: -5px; background: #e74c3c; border-radius: 50%; width: 15px; height: 15px; font-size: 10px; display: none; justify-content: center; align-items: center; color: white; }
-        .glass-btn:hover .delete-btn-x { display: flex; }
-
-        .response-setup { background: rgba(0, 0, 0, 0.3); border: 1px solid #5fc9f8; padding: 10px; border-radius: 8px; margin-top: 5px; width: 100%; }
-        .response-setup textarea { width: 100%; background: #0e1621; border: 1px solid #2c3e50; color: white; border-radius: 5px; padding: 8px; font-size: 13px; resize: none; }
-
-        .chat-footer { padding: 15px; background: #17212b; border-top: 1px solid #0e1621; }
-        .chat-footer button { background: transparent; border: 1px dashed #5fc9f8; color: #5fc9f8; padding: 10px; border-radius: 10px; width: 100%; cursor: pointer; }
-        .chat-footer .btn-save { background: #27c93f; color: white; border: none; margin-top: 10px; font-weight: bold; }
-
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>سازنده اپلیکیشن بدون کد</title>
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700&family=Estedad:wght@400;700&family=Lalezar&family=Gulzar&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
 <div class="app-container">
-    <!-- صفحه ورود توکن -->
-    <div id="token-screen" class="screen active">
-        <h1>🤖 اتصال به بات بله</h1>
-        <p style="color: #aaa; margin-bottom: 30px; font-size: 14px;">برای شروع، توکن ربات خود را از Bot Father بله دریافت و وارد کنید.</p>
-        <input type="text" id="token-input" placeholder="123456789:ABCdefGhi...">
-        <button class="btn-primary" onclick="connectBot()">اتصال به ربات</button>
-        <div id="status-text"></div>
+    <div id="home-screen" class="screen active">
+        <div class="card" onclick="goToBuilder()">
+            <div class="card-text">
+                <h2>ساخت اپ موبایل</h2>
+                <span>اپلیکیشن وب و اندروید</span>
+            </div>
+            <div class="card-icon">📱</div>
+        </div>
     </div>
 
-    <!-- صفحه شبیه ساز بله -->
-    <div id="simulator-screen" class="screen">
-        <div class="chat-header">
-            <div class="avatar" id="bot-avatar">B</div>
-            <div>
-                <h3 id="bot-name">ربات من</h3>
-                <span>● آنلاین (در حال تست)</span>
+    <div id="builder-screen" class="screen">
+        <div class="builder-header">
+            <button class="header-btn" onclick="goToHome()">⟵</button>
+            <h3>محیط طراحی اپ</h3>
+            <button class="header-btn" onclick="openDrawer()">⚙️</button>
+        </div>
+        <div class="canvas-area" id="canvas"></div>
+    </div>
+
+    <div class="drawer-overlay" id="overlay" onclick="closeDrawerAndDeselect()"></div>
+    
+    <div class="drawer" id="drawer">
+        <div class="drawer-header">
+            <h4 id="drawer-title">افزودن المان</h4>
+            <button class="header-btn" onclick="closeDrawerAndDeselect()">✖</button>
+        </div>
+        <div class="drawer-content">
+            <div id="view-main" class="drawer-view active">
+                <div class="menu-item" onclick="showView('view-pages')"><span>📄 صفحات</span><span>›</span></div>
+                <div class="menu-item" onclick="showView('view-button-list')"><span>🔘 دکمه</span><span>›</span></div>
+                <div class="menu-item" onclick="showView('view-text-list')"><span>✍️ متن</span><span>›</span></div>
+                <div class="menu-item" onclick="showView('view-image-list')"><span>🖼️ تصویر</span><span>›</span></div>
+                <div class="menu-item" onclick="showView('view-switch-list')"><span>🎚️ سوئیچ (بولین)</span><span>›</span></div>
+                <div class="menu-item" onclick="showView('view-input-list')"><span>⌨️ فیلد متنی</span><span>›</span></div>
             </div>
-        </div>
 
-        <div class="chat-area" id="chat-area">
-            <!-- پیام اولیه -->
-            <div class="message-bubble editable" id="welcome-msg" contenteditable="true" data-placeholder="پیام اولیه ربات را اینجا بنویسید... (مثلاً: سلام خوش اومدی!)"></div>
-            
-            <!-- دکمه‌های شیشه‌ای اینجا اضافه می‌شوند -->
-            <div class="glass-buttons-container" id="glass-buttons"></div>
-        </div>
+            <!-- صفحات -->
+            <div id="view-pages" class="drawer-view">
+                <button class="back-btn" onclick="showView('view-main')">⟵ بازگشت</button>
+                <button class="btn-add" onclick="addNewPage()">➕ ساخت صفحه جدید</button>
+                <div id="existing-pages"></div>
+            </div>
+            <div id="view-page-settings" class="drawer-view">
+                <button class="back-btn" onclick="showView('view-pages')">⟵ بازگشت</button>
+                <div class="form-group"><label>نام صفحه</label><input type="text" id="page-name" class="form-control" oninput="updatePageData()"></div>
+                <div class="form-group"><label>رنگ پس‌زمینه صفحه</label><input type="color" id="page-bg-color" class="color-input" onchange="updatePageData()"></div>
+            </div>
 
-        <div class="chat-footer">
-            <button onclick="addGlassButton()">➕ افزودن دکمه شیشه‌ای</button>
-            <button class="btn-save" onclick="saveAndStartBot()">✅ ذخیره و روشن کردن ربات</button>
+            <!-- دکمه‌ها -->
+            <div id="view-button-list" class="drawer-view">
+                <button class="back-btn" onclick="showView('view-main')">⟵ بازگشت</button>
+                <button class="btn-add" onclick="prepareNewElement('button')">➕ ساخت دکمه</button>
+                <div id="existing-buttons" class="el-list"></div>
+            </div>
+            <div id="view-button-settings" class="drawer-view">
+                <button class="back-btn" onclick="showView('view-button-list')">⟵ بازگشت</button>
+                <div class="form-group"><label>متن دکمه</label><input type="text" id="btn-text" class="form-control" oninput="updateElement()"></div>
+                <div class="form-row">
+                    <div class="form-group"><label>عرض</label><input type="number" id="btn-width" class="form-control" oninput="updateElement()"></div>
+                    <div class="form-group"><label>ارتفاع</label><input type="number" id="btn-height" class="form-control" oninput="updateElement()"></div>
+                </div>
+                <div class="form-group"><label>فونت دکمه</label>
+                    <select id="btn-font" class="form-control" onchange="updateElement()">
+                        <option value="Vazirmatn">وزیرمتن (ساده)</option>
+                        <option value="Estedad">استداد (مدرن)</option>
+                        <option value="Lalezar">لاله‌زار (فانتزی)</option>
+                        <option value="Gulzar">گلزار (تحریری)</option>
+                    </select>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>اندازه فونت</label><input type="number" id="btn-font-size" value="16" class="form-control" oninput="updateElement()"></div>
+                    <div class="form-group"><label>کلفتی</label>
+                        <select id="btn-font-weight" class="form-control" onchange="updateElement()">
+                            <option value="normal">عادی</option>
+                            <option value="bold">ضخیم</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>رنگ دکمه</label>
+                        <input type="color" id="btn-bg-color" class="color-input" onchange="updateElement()">
+                        <div class="transparent-toggle"><input type="checkbox" id="btn-bg-transparent" onchange="toggleTransparent(this, 'btn-bg-color')"> شفاف (بدون رنگ)</div>
+                    </div>
+                    <div class="form-group">
+                        <label>رنگ نوار دور</label>
+                        <input type="color" id="btn-border-color" class="color-input" onchange="updateElement()">
+                        <div class="transparent-toggle"><input type="checkbox" id="btn-border-transparent" onchange="toggleTransparent(this, 'btn-border-color')"> شفاف (بدون نوار)</div>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>ضخامت نوار</label><input type="number" id="btn-border-width" class="form-control" value="2" min="0" max="20" oninput="updateElement()"></div>
+                    <div class="form-group"><label>شکل دکمه</label>
+                        <select id="btn-shape" class="form-control" onchange="updateElement()">
+                            <option value="8">مربع گرد</option><option value="0">مربع تیز</option><option value="30">کپسولی</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>اتصال به صفحه</label>
+                    <select id="btn-link-page" class="form-control" onchange="updateElement()"></select>
+                </div>
+                <button class="btn-save" id="btn-create" style="display:none;" onclick="createElementFromSettings('button')">✅ ساخت دکمه</button>
+                <button class="btn-danger" id="btn-delete" onclick="deleteSelectedElement()">🗑 حذف این دکمه</button>
+            </div>
+
+            <!-- متن‌ها -->
+            <div id="view-text-list" class="drawer-view">
+                <button class="back-btn" onclick="showView('view-main')">⟵ بازگشت</button>
+                <button class="btn-add" onclick="prepareNewElement('text')">➕ ساخت متن</button>
+                <div id="existing-texts" class="el-list"></div>
+            </div>
+            <div id="view-text-settings" class="drawer-view">
+                <button class="back-btn" onclick="showView('view-text-list')">⟵ بازگشت</button>
+                <div class="form-group"><label>متن</label><textarea id="txt-content" rows="3" class="form-control" oninput="updateElement()"></textarea></div>
+                <div class="form-group"><label>فونت</label>
+                    <select id="txt-font" class="form-control" onchange="updateElement()">
+                        <option value="Vazirmatn">وزیرمتن (ساده)</option>
+                        <option value="Estedad">استداد (مدرن)</option>
+                        <option value="Lalezar">لاله‌زار (فانتزی)</option>
+                        <option value="Gulzar">گلزار (تحریری)</option>
+                    </select>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>کلفتی</label>
+                        <select id="txt-weight" class="form-control" onchange="updateElement()">
+                            <option value="normal">عادی</option><option value="bold">ضخیم</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><label>اندازه فونت</label><input type="number" id="txt-size" class="form-control" value="16" oninput="updateElement()"></div>
+                </div>
+                <div class="form-group"><label>رنگ متن</label><input type="color" id="txt-color" class="color-input" value="#ffffff" onchange="updateElement()"></div>
+                <button class="btn-save" id="txt-create" style="display:none;" onclick="createElementFromSettings('text')">✅ ساخت متن</button>
+                <button class="btn-danger" id="txt-delete" onclick="deleteSelectedElement()">🗑 حذف این متن</button>
+            </div>
+
+            <!-- تصاویر -->
+            <div id="view-image-list" class="drawer-view">
+                <button class="back-btn" onclick="showView('view-main')">⟵ بازگشت</button>
+                <button class="btn-add" onclick="prepareNewElement('image')">➕ ساخت تصویر</button>
+                <div id="existing-images" class="el-list"></div>
+            </div>
+            <div id="view-image-settings" class="drawer-view">
+                <button class="back-btn" onclick="showView('view-image-list')">⟵ بازگشت</button>
+                <div class="form-group">
+                    <label>آپلود تصویر</label>
+                    <label for="img-upload" class="file-upload-label">برای انتخاب کلیک کنید</label>
+                    <input type="file" id="img-upload" accept="image/*" style="display:none;" onchange="handleImageUpload(event)">
+                    <img id="img-preview" />
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>عرض</label><input type="number" id="img-width" class="form-control" value="150" oninput="updateElement()"></div>
+                    <div class="form-group"><label>ارتفاع</label><input type="number" id="img-height" class="form-control" value="150" oninput="updateElement()"></div>
+                </div>
+                <button class="btn-save" id="img-create" style="display:none;" onclick="createElementFromSettings('image')">✅ ساخت تصویر</button>
+                <button class="btn-danger" id="img-delete" onclick="deleteSelectedElement()">🗑 حذف این تصویر</button>
+            </div>
+
+            <!-- سوئیچ (بولین) -->
+            <div id="view-switch-list" class="drawer-view">
+                <button class="back-btn" onclick="showView('view-main')">⟵ بازگشت</button>
+                <button class="btn-add" onclick="prepareNewElement('switch')">➕ ساخت سوئیچ</button>
+                <div id="existing-switches" class="el-list"></div>
+            </div>
+            <div id="view-switch-settings" class="drawer-view">
+                <button class="back-btn" onclick="showView('view-switch-list')">⟵ بازگشت</button>
+                <div class="form-group"><label>متن کنار سوئیچ</label><input type="text" id="sw-text" class="form-control" value="فعالسازی" oninput="updateElement()"></div>
+                <div class="form-group"><label>نوع سوئیچ</label>
+                    <select id="sw-type" class="form-control" onchange="updateElement()">
+                        <option value="toggle">دایره متحرک (Toggle)</option>
+                        <option value="checkbox">مربع تیک‌دار (Checkbox)</option>
+                    </select>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>رنگ سوئیچ (روشن)</label><input type="color" id="sw-on-color" class="color-input" value="#27c93f" onchange="updateElement()"></div>
+                    <div class="form-group"><label>رنگ متن</label><input type="color" id="sw-text-color" class="color-input" value="#ffffff" onchange="updateElement()"></div>
+                </div>
+                <button class="btn-save" id="sw-create" style="display:none;" onclick="createElementFromSettings('switch')">✅ ساخت سوئیچ</button>
+                <button class="btn-danger" id="sw-delete" onclick="deleteSelectedElement()">🗑 حذف این سوئیچ</button>
+            </div>
+
+            <!-- فیلد متنی (Input) -->
+            <div id="view-input-list" class="drawer-view">
+                <button class="back-btn" onclick="showView('view-main')">⟵ بازگشت</button>
+                <button class="btn-add" onclick="prepareNewElement('input')">➕ ساخت فیلد متنی</button>
+                <div id="existing-inputs" class="el-list"></div>
+            </div>
+            <div id="view-input-settings" class="drawer-view">
+                <button class="back-btn" onclick="showView('view-input-list')">⟵ بازگشت</button>
+                <div class="form-group"><label>متن راهنما (Placeholder)</label><input type="text" id="in-placeholder" class="form-control" value="متن خود را وارد کنید" oninput="updateElement()"></div>
+                <div class="form-row">
+                    <div class="form-group"><label>عرض</label><input type="number" id="in-width" class="form-control" value="200" oninput="updateElement()"></div>
+                    <div class="form-group"><label>ارتفاع</label><input type="number" id="in-height" class="form-control" value="40" oninput="updateElement()"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>رنگ پس‌زمینه</label><input type="color" id="in-bg-color" class="color-input" value="#0e1621" onchange="updateElement()"></div>
+                    <div class="form-group"><label>رنگ نوار دور</label><input type="color" id="in-border-color" class="color-input" value="#2c3e50" onchange="updateElement()"></div>
+                </div>
+                <button class="btn-save" id="in-create" style="display:none;" onclick="createElementFromSettings('input')">✅ ساخت فیلد</button>
+                <button class="btn-danger" id="in-delete" onclick="deleteSelectedElement()">🗑 حذف این فیلد</button>
+            </div>
         </div>
     </div>
 </div>
 
-<script>
-    // پل ارتباطی جدید و پایدارتر برای دور زدن محدودیت
-    const PROXY = 'https://api.codetabs.com/v1/proxy/?quest=';
-
-    // متغیرهای global
-    let botToken = '';
-    let lastUpdateId = 0;
-    let isPolling = false;
-
-    // ۱. اتصال به بله
-    async function connectBot() {
-        const token = document.getElementById('token-input').value.trim();
-        const statusText = document.getElementById('status-text');
-        
-        if(!token) { statusText.innerText = "لطفاً توکن را وارد کنید."; return; }
-        
-        statusText.innerText = "⏳ در حال بررسی توکن...";
-        statusText.style.color = "#f39c12";
-
-        try {
-            const baleUrl = `https://tapi.bale.ir/bot${token}/getMe`;
-            // استفاده از پل allorigins
-            const res = await fetch(PROXY + encodeURIComponent(baleUrl));
-            const data = await res.json();
-
-            if(data.ok) {
-                botToken = token;
-                document.getElementById('bot-name').innerText = data.result.first_name || "ربات من";
-                document.getElementById('bot-avatar').innerText = (data.result.first_name || "B").charAt(0);
-                
-                // تغییر صفحه
-                document.getElementById('token-screen').classList.remove('active');
-                document.getElementById('simulator-screen').classList.add('active');
-            } else {
-                statusText.innerText = "❌ توکن نامعتبر است یا بله دسترسی داده نیست.";
-                statusText.style.color = "#e74c3c";
-            }
-        } catch (error) {
-            statusText.innerText = "❌ خطا در اتصال. لطفاً دوباره تلاش کنید.";
-            statusText.style.color = "#e74c3c";
-            console.error(error);
-        }
-    }
-
-    // ۲. ساخت دکمه شیشه‌ای
-    let btnCounter = 0;
-    function addGlassButton() {
-        btnCounter++;
-        const container = document.getElementById('glass-buttons');
-        
-        const btnWrapper = document.createElement('div');
-        btnWrapper.style.display = 'flex';
-        btnWrapper.style.flexDirection = 'column';
-        btnWrapper.style.width = '100%';
-
-        const btn = document.createElement('button');
-        btn.className = 'glass-btn';
-        btn.innerText = 'دکمه جدید';
-        btn.contentEditable = true;
-        btn.style.outline = 'none';
-        
-        const delBtn = document.createElement('span');
-        delBtn.className = 'delete-btn-x';
-        delBtn.innerText = '✖';
-        delBtn.onclick = () => btnWrapper.remove();
-
-        const setupDiv = document.createElement('div');
-        setupDiv.className = 'response-setup';
-        setupDiv.style.display = 'none';
-        
-        const label = document.createElement('label');
-        label.innerText = 'وقتی کاربر این دکمه را زد، این پیام ارسال شود:';
-        label.style.display = 'block';
-        label.style.marginBottom = '5px';
-        label.style.fontSize = '12px';
-        label.style.color = '#ccc';
-        
-        const textarea = document.createElement('textarea');
-        textarea.rows = 2;
-        textarea.placeholder = 'مثلاً: شما دکمه X را فشردید...';
-
-        setupDiv.appendChild(label);
-        setupDiv.appendChild(textarea);
-
-        btn.onclick = (e) => {
-            if(e.detail === 1) {
-                setupDiv.style.display = setupDiv.style.display === 'none' ? 'block' : 'none';
-            }
-        };
-
-        btn.appendChild(delBtn);
-        btnWrapper.appendChild(btn);
-        btnWrapper.appendChild(setupDiv);
-        container.appendChild(btnWrapper);
-    }
-
-    // ۳. ذخیره و روشن کردن ربات
-    function saveAndStartBot() {
-        if (isPolling) {
-            alert("ربات از قبل روشن است و منتظر دریافت /start است.");
-            return;
-        }
-        isPolling = true;
-        alert("✅ ربات روشن شد! حالا به بله بروید و /start را بفرستید.\n(این صفحه نباید بسته شود)");
-        pollUpdates();
-    }
-
-    // ۴. دریافت پیام‌ها از بله (Long Polling)
-    async function pollUpdates() {
-        if (!isPolling) return;
-        
-        try {
-            const url = `https://tapi.bale.ir/bot${botToken}/getUpdates?offset=${lastUpdateId}&timeout=30`;
-            const res = await fetch(PROXY + encodeURIComponent(url));
-            const data = await res.json();
-
-            if(data.ok) {
-                for (let update of data.result) {
-                    lastUpdateId = update.update_id + 1;
-                    
-                    if(update.message && update.message.text === '/start') {
-                        sendWelcomeMessage(update.message.chat.id);
-                    }
-                    
-                    if(update.callback_query) {
-                        handleButtonClick(update.callback_query);
-                    }
-                }
-            }
-        } catch (error) { console.error("Polling Error:", error); }
-
-        setTimeout(pollUpdates, 2000); 
-    }
-
-    // ۵. ارسال پیام اولیه و دکمه‌ها
-    async function sendWelcomeMessage(chatId) {
-        const welcomeText = document.getElementById('welcome-msg').innerText.trim() || "سلام!";
-        
-        let keyboard = [];
-        const buttons = document.querySelectorAll('#glass-buttons .glass-btn');
-        buttons.forEach((btn, index) => {
-            const text = btn.innerText.replace('✖', '').trim();
-            if(text) {
-                keyboard.push([{ text: text, callback_data: `btn_${index}` }]);
-            }
-        });
-
-        let replyMarkup = keyboard.length > 0 ? JSON.stringify({ inline_keyboard: keyboard }) : null;
-
-        let baleUrl = `https://tapi.bale.ir/bot${botToken}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(welcomeText)}`;
-        if(replyMarkup) baleUrl += `&reply_markup=${encodeURIComponent(replyMarkup)}`;
-
-        await fetch(PROXY + encodeURIComponent(baleUrl));
-    }
-
-    // ۶. پاسخ به کلیک روی دکمه‌ها
-    async function handleButtonClick(callbackQuery) {
-        const chatId = callbackQuery.message.chat.id;
-        const data = callbackQuery.data;
-        
-        const index = parseInt(data.split('_')[1]);
-        const buttons = document.querySelectorAll('#glass-buttons .glass-btn');
-        
-        if(buttons[index]) {
-            const setupDiv = buttons[index].nextElementSibling;
-            const responseText = setupDiv.querySelector('textarea').value.trim() || "پاسخی تعریف نشده است.";
-            
-            const baleUrl = `https://tapi.bale.ir/bot${botToken}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(responseText)}`;
-            await fetch(PROXY + encodeURIComponent(baleUrl));
-            
-            const ansUrl = `https://tapi.bale.ir/bot${botToken}/answerCallbackQuery?callback_query_id=${callbackQuery.id}&text=انجام شد!`;
-            await fetch(PROXY + encodeURIComponent(ansUrl));
-        }
-    }
-</script>
-
+<script src="script.js"></script>
 </body>
 </html>
