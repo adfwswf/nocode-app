@@ -2,32 +2,26 @@
 body { background-color: #0f0f1a; color: white; display: flex; justify-content: center; align-items: center; min-height: 100vh; overflow: hidden; }
 
 .app-container { width: 100%; max-width: 450px; height: 100vh; background-color: #17212b; position: relative; overflow: hidden; transition: max-width 0.3s, height 0.3s, border-radius 0.3s, border 0.3s; }
-
 body.desktop-mode { background-color: #0a0a12; padding: 20px; }
 body.desktop-mode .app-container { max-width: 900px; height: 90vh; border-radius: 15px; border: 1px solid #2c3e50; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
 
 .screen { display: none; flex-direction: column; height: 100%; }
 .screen.active { display: flex; }
 
-#home-screen { justify-content: center; align-items: center; padding: 20px; text-align: center; }
+#home-screen, #auth-screen { justify-content: center; align-items: center; padding: 20px; text-align: center; }
 .card { width: 100%; max-width: 350px; height: 140px; border-radius: 20px; padding: 20px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; box-shadow: 0 10px 20px rgba(0,0,0,0.2); background: linear-gradient(135deg, #0984E3, #74B9FF); }
-.card h2 { font-size: 22px; }
-.card span { font-size: 14px; opacity: 0.9; }
-.card-icon { font-size: 50px; }
+.card h2 { font-size: 22px; } .card span { font-size: 14px; opacity: 0.9; } .card-icon { font-size: 50px; }
+#auth-screen h1 { color: #5fc9f8; margin-bottom: 20px; }
 
 #builder-screen { background-color: #0e1621; position: relative; transition: background-color 0.3s; border-radius: inherit; }
 .builder-header { background: #17212b; padding: 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #2c3e50; z-index: 100; gap: 10px; border-radius: 15px 15px 0 0; }
-.builder-header h3 { color: white; font-size: 16px; }
-.header-btn { background: transparent; border: none; color: #5fc9f8; font-size: 24px; cursor: pointer; }
+.builder-header h3 { color: white; font-size: 16px; } .header-btn { background: transparent; border: none; color: #5fc9f8; font-size: 24px; cursor: pointer; }
 .page-switcher { background: #0e1621; color: white; border: 1px solid #2c3e50; border-radius: 8px; padding: 8px; font-size: 14px; flex: 1; max-width: 150px; }
-
 .canvas-area { flex: 1; position: relative; overflow: hidden; touch-action: none; border-radius: 0 0 15px 15px; }
 
 .draggable-el { position: absolute; cursor: pointer; display: flex; align-items: center; justify-content: center; border-style: solid; border-width: 2px; border-color: transparent; touch-action: none; overflow: visible; z-index: 5; }
 .el-content { pointer-events: none; user-select: none; width: 100%; height: 100%; text-align: center; display: flex; align-items: center; justify-content: center; gap: 8px; overflow: hidden; border-radius: inherit; }
-#canvas.simulate-active .el-content { pointer-events: auto; }
-#canvas.simulate-active .draggable-el { cursor: default; }
-
+#canvas.simulate-active .el-content { pointer-events: auto; } #canvas.simulate-active .draggable-el { cursor: default; }
 .draggable-el.edit-mode { outline: 2px dashed #ffffff; outline-offset: 6px; z-index: 15; }
 .draggable-el.locked.selected { outline: 2px dashed #ffffff; outline-offset: 6px; z-index: 15; }
 .draggable-el img { width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
@@ -36,17 +30,12 @@ body.desktop-mode .app-container { max-width: 900px; height: 90vh; border-radius
 .boolean-switch.on { background: #27c93f; }
 .boolean-knob { width: 16px; height: 16px; background: white; border-radius: 50%; position: absolute; top: 2px; right: 2px; transition: 0.3s; }
 .boolean-switch.on .boolean-knob { right: 22px; }
-
 .boolean-checkbox { width: 20px; height: 20px; background: #ccc; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: white; font-size: 14px; font-weight: bold; flex-shrink: 0; transition: 0.3s; }
 .boolean-checkbox.on { background: #27c93f; }
 
 .btn-toolbar { position: absolute; top: -35px; right: 0; display: flex; gap: 5px; background: #17212b; padding: 3px; border-radius: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.5); z-index: 999; }
 .tool-btn { width: 25px; height: 25px; border-radius: 50%; border: none; color: white; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; background: #2c3e50; }
-.tool-btn.confirm { background: #27c93f; }
-.tool-btn.cancel { background: #e74c3c; }
-.tool-btn.edit { background: #f39c12; }
-.tool-btn.settings { background: #5fc9f8; color: #17212b; }
-.tool-btn.trash { background: #e74c3c; }
+.tool-btn.confirm { background: #27c93f; } .tool-btn.cancel { background: #e74c3c; } .tool-btn.edit { background: #f39c12; } .tool-btn.settings { background: #5fc9f8; color: #17212b; } .tool-btn.trash { background: #e74c3c; }
 
 .drawer-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; z-index: 50; }
 .drawer-overlay.active { display: block; }
@@ -55,16 +44,11 @@ body.desktop-mode .app-container { max-width: 900px; height: 90vh; border-radius
 .drawer-header { padding: 15px; border-bottom: 1px solid #2c3e50; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
 .drawer-header h4 { font-size: 16px; color: white; }
 .drawer-content { padding: 15px; flex: 1; overflow-y: auto; padding-bottom: 80px; -webkit-overflow-scrolling: touch; }
-
-.drawer-view { display: none; }
-.drawer-view.active { display: block; }
+.drawer-view { display: none; } .drawer-view.active { display: block; }
 .menu-item { display: flex; align-items: center; justify-content: space-between; padding: 15px; background: #0e1621; border-radius: 10px; margin-bottom: 10px; cursor: pointer; color: white; font-size: 14px; border: 1px solid #2c3e50; }
 .back-btn { background: transparent; border: none; color: #5fc9f8; font-size: 14px; cursor: pointer; margin-bottom: 15px; display: flex; align-items: center; gap: 5px; }
-
-.form-group { margin-bottom: 20px; }
-.form-group label { display: block; margin-bottom: 8px; font-size: 13px; color: #aaa; }
-.form-row { display: flex; gap: 10px; }
-.form-row .form-group { flex: 1; }
+.form-group { margin-bottom: 20px; } .form-group label { display: block; margin-bottom: 8px; font-size: 13px; color: #aaa; }
+.form-row { display: flex; gap: 10px; } .form-row .form-group { flex: 1; }
 .form-control { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #2c3e50; background: #0e1621; color: white; font-size: 13px; }
 .color-input { width: 100%; height: 40px; border-radius: 8px; border: 1px solid #2c3e50; background: #0e1621; cursor: pointer; }
 .btn-add { width: 100%; padding: 12px; border: none; border-radius: 8px; background: #5fc9f8; color: #17212b; font-weight: bold; cursor: pointer; margin-bottom: 20px; }
@@ -72,5 +56,4 @@ body.desktop-mode .app-container { max-width: 900px; height: 90vh; border-radius
 .btn-danger { width: 100%; padding: 10px; border: none; border-radius: 8px; background: #e74c3c; color: white; cursor: pointer; }
 .file-upload-label { display: block; width: 100%; padding: 30px; border: 2px dashed #2c3e50; border-radius: 8px; text-align: center; cursor: pointer; color: #aaa; font-size: 13px; }
 #img-preview { width: 100%; border-radius: 8px; margin-top: 10px; display: none; }
-.transparent-toggle { display: flex; align-items: center; gap: 8px; margin-top: 8px; font-size: 12px; color: #aaa; }
-.transparent-toggle input { width: 16px; height: 16px; }
+.transparent-toggle { display: flex; align-items: center; gap: 8px; margin-top: 8px; font-size: 12px; color: #aaa; } .transparent-toggle input { width: 16px; height: 16px; }
