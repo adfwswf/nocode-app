@@ -25,7 +25,8 @@
             <button class="header-btn" onclick="goToHome()">⟵</button>
             <select id="page-switcher" class="page-switcher" onchange="switchPage(this.value)"></select>
             <div style="display:flex; gap:10px; margin-right:auto;">
-                <button class="header-btn" onclick="toggleDeviceView()" title="تغییر نمایش">🖥️</button>
+                <button class="header-btn" id="device-btn" onclick="toggleDeviceView(this)" title="تغییر نمایش">💻</button>
+                <button class="header-btn" onclick="saveAppData()" title="ذخیره پروژه">💾</button>
                 <button class="header-btn" onclick="startSimulation()" title="شبیه‌سازی">▶️</button>
                 <button class="header-btn" onclick="showView('view-main'); openDrawer();" title="افزودن">➕</button>
             </div>
@@ -103,7 +104,11 @@
                     </div>
                 </div>
                 <div class="form-row">
-                    <div class="form-group"><label>رنگ متن دکمه</label><input type="color" id="btn-text-color" class="color-input" value="#17212b" onchange="updateElement()"></div>
+                    <div class="form-group">
+                        <label>رنگ متن دکمه</label>
+                        <input type="color" id="btn-text-color" class="color-input" value="#17212b" onchange="updateElement()">
+                        <div class="transparent-toggle"><input type="checkbox" id="btn-text-transparent" onchange="toggleTransparent(this, 'btn-text-color')"> متن شفاف (مخفی)</div>
+                    </div>
                     <div class="form-group"><label>رنگ دکمه</label><input type="color" id="btn-bg-color" class="color-input" onchange="updateElement()"></div>
                 </div>
                 <div class="transparent-toggle" style="margin-bottom:15px;"><input type="checkbox" id="btn-bg-transparent" onchange="toggleTransparent(this, 'btn-bg-color')"> شفاف (بدون رنگ)</div>
