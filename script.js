@@ -1,19 +1,28 @@
 let selectedElement = null, currentEditEl = null, elCounter = 0, prevState = null, isCreating = false, currentType = null, currentUploadSrc = null;
 let isDragging = false, isPinching = false, startX, startY, startLeft, startTop, initialDist = 0, startW = 0, startH = 0, startFontSize = 16, hasDragged = false;
 let isCreatingPage = false;
+let simulateMode = false;
 
 let pages = [{ id: 1, name: "صفحه اصلی", bg: "#0e1621" }];
 let selectedPageId = 1;
+let homePageId = 1;
 
 // --- صفحات ---
 function renderPages() {
     const list = document.getElementById('existing-pages'); list.innerHTML = '';
+    const switcher = document.getElementById('page-switcher'); switcher.innerHTML = '';
     pages.forEach(p => {
+        // لیست در منو
         const item = document.createElement('div');
         item.className = 'menu-item'; item.innerHTML = `<span>📄 ${p.name}</span><span>›</span>`;
         item.onclick = () => selectPage(p.id);
         list.appendChild(item);
+        // منوی کشویی بالا
+        const opt = document.createElement('option');
+        opt.value = p.id; opt.innerText = p.name + (p.id === homePageId ? " (صفحه اصلی)" : "");
+        switcher.appendChild(opt);
     });
+    switcher.value = selectedPageId;
 }
 function prepareNewPage() {
     isCreatingPage = true;
@@ -21,6 +30,7 @@ function prepareNewPage() {
     document.getElementById('page-bg-color').value = "#1a1a2e";
     document.getElementById('page-create').style.display = 'block';
     document.getElementById('page-delete').style.display = 'none';
+    document.getElementById('page-set-home').style.display = 'none';
     showView('view-page-settings');
 }
 function createPageFromSettings() {
@@ -33,15 +43,24 @@ function createPageFromSettings() {
     isCreatingPage = false;
 }
 function selectPage(id) {
-    selectedPageId = id;
-    const p = pages.find(x => x.id === id); if(!p) return;
+    if(simulateMode) return; // تو شبیه‌سازی ساز مانیتور نمیتونه صفحه عوض کنه
+    selectedPageId = parseInt(id);
+    const p = pages.find(x => x.id === selectedPageId); if(!p) return;
     document.getElementById('canvas').style.backgroundColor = p.bg;
     document.getElementById('page-name').value = p.name;
     document.getElementById('page-bg-color').value = p.bg;
     isCreatingPage = false;
     document.getElementById('page-create').style.display = 'none';
     document.getElementById('page-delete').style.display = 'block';
+    document.getElementById('page-set-home').style.display = (selectedPageId === homePageId) ? 'none' : 'block';
+    
+    // مخفی کردن المان‌های صفحه‌های دیگه
+    document.querySelectorAll('#canvas .draggable-el').forEach(el => {
+        el.style.display = (parseInt(el.dataset.pageId) === selectedPageId) ? 'flex' : 'none';
+    });
+    
     showView('view-page-settings');
+    document.getElementById('page-switcher').value = selectedPageId;
 }
 function updatePageData() {
     if(isCreatingPage) return;
@@ -58,12 +77,16 @@ function deleteSelectedPage() {
     renderPages(); populatePageLinks();
     selectPage(pages[0].id);
 }
+function setAsHomePage() {
+    homePageId = selectedPageId;
+    document.getElementById('page-set-home').style.display = 'none';
+    renderPages();
+    alert("صفحه اصلی با موفقیت تغییر کرد!");
+}
 
 // --- ناوبری ---
-function goToBuilder() { document.getElementById('home-screen').classList.remove('active'); document.getElementById('builder-screen').classList.add('active'); renderPages(); populatePageLinks(); }
+function goToBuilder() { document.getElementById('home-screen').classList.remove('active'); document.getElementById('builder-screen').classList.add('active'); renderPages(); populatePageLinks(); selectPage(1); }
 function goToHome() { document.getElementById('builder-screen').classList.remove('active'); document.getElementById('home-screen').classList.add('active'); }
-
-// اینجا تغییر کرد: دیگه به زور نمیره تو view-main
 function openDrawer() { document.getElementById('drawer').classList.add('active'); document.getElementById('overlay').classList.add('active'); }
 function hideDrawer() { document.getElementById('drawer').classList.remove('active'); document.getElementById('overlay').classList.remove('active'); }
 function closeDrawerAndDeselect() { hideDrawer(); if (currentEditEl) lockElement(currentEditEl); deselectAllElements(); }
@@ -71,6 +94,44 @@ function showView(viewId) {
     document.querySelectorAll('.drawer-view').forEach(v => v.classList.remove('active'));
     document.getElementById(viewId).classList.add('active');
     updateExistingLists();
+}
+
+function toggleDeviceView() {
+    document.body.classList.toggle('desktop-mode');
+}
+
+// --- شبیه‌سازی ---
+function startSimulation() {
+    simulateMode = true;
+    document.getElementById('builder-header').style.display = 'none';
+    document.getElementById('simulator-header').style.display = 'flex';
+    document.getElementById('canvas').classList.add('simulate-active');
+    deselectAllElements();
+    if(currentEditEl) lockElement(currentEditEl);
+    renderSimulatorView(homePageId);
+}
+function stopSimulation() {
+    simulateMode = false;
+    document.getElementById('builder-header').style.display = 'flex';
+    document.getElementById('simulator-header').style.display = 'none';
+    document.getElementById('canvas').classList.remove('simulate-active');
+    // غیرفعال کردن مجدد اینپوت‌ها
+    document.querySelectorAll('#canvas input').forEach(inp => inp.disabled = true);
+    selectPage(selectedPageId);
+}
+function restartSimulation() { renderSimulatorView(homePageId); }
+function renderSimulatorView(pageId) {
+    const p = pages.find(x => x.id === pageId); if(!p) return;
+    document.getElementById('canvas').style.backgroundColor = p.bg;
+    document.querySelectorAll('#canvas .draggable-el').forEach(el => {
+        if(parseInt(el.dataset.pageId) === pageId) {
+            el.style.display = 'flex';
+            const input = el.querySelector('input');
+            if(input) input.disabled = false; // فعال کردن تایپ متن
+        } else {
+            el.style.display = 'none';
+        }
+    });
 }
 
 function populatePageLinks() {
@@ -126,6 +187,7 @@ function createElementFromSettings(type) {
     const el = document.createElement('div');
     el.className = 'draggable-el locked'; el.style.top = '100px'; el.style.left = '100px';
     el.setAttribute('data-type', type);
+    el.dataset.pageId = selectedPageId; // اختصاص به صفحه فعلی
     const content = document.createElement('div'); content.className = 'el-content'; el.appendChild(content);
     document.getElementById('canvas').appendChild(el);
     initInteractions(el); applySettingsToElement(el); enableEditMode(el); hideDrawer();
@@ -213,7 +275,6 @@ function selectLockedElement(el) {
     deselectAllElements(); el.classList.add('selected');
     const toolbar = document.createElement('div'); toolbar.className = 'btn-toolbar';
     toolbar.appendChild(createToolBtn('edit', '✏️', () => enableEditMode(el)));
-    // اینجا تغییر کرد: وقتی تنظیمات رو میزنم، اول لود کن بعد نوار رو بیار
     toolbar.appendChild(createToolBtn('settings', '⚙️', () => { loadSettingsForElement(el); openDrawer(); }));
     el.appendChild(toolbar);
 }
@@ -292,17 +353,14 @@ function updateExistingLists() {
     for(let type in types) {
         const list = document.getElementById(types[type]); if(!list) continue; list.innerHTML = '';
         document.querySelectorAll(`#canvas .draggable-el[data-type="${type}"]`).forEach((el, i) => {
+            if(parseInt(el.dataset.pageId) !== selectedPageId) return; // فقط المان‌های همین صفحه
             const item = document.createElement('div'); item.className = 'menu-item'; item.style.marginBottom = '8px';
             const content = el.querySelector('.el-content');
             if(type === 'button' || type === 'text') item.innerText = content.innerText.substring(0,15);
             else if(type === 'switch') item.innerText = 'سوئیچ: ' + (content.querySelector('span')?.innerText || '');
             else if(type === 'input') item.innerText = 'فیلد: ' + (content.querySelector('input')?.placeholder || '');
             else item.innerText = 'تصویر ' + (i+1);
-            item.onclick = () => { 
-                selectLockedElement(el); 
-                loadSettingsForElement(el); 
-                openDrawer(); 
-            };
+            item.onclick = () => { selectLockedElement(el); loadSettingsForElement(el); openDrawer(); };
             list.appendChild(item);
         });
     }
@@ -324,12 +382,28 @@ function createToolBtn(type, icon, callback) {
 function initInteractions(el) {
     el.addEventListener('click', (e) => {
         if (hasDragged) { hasDragged = false; return; }
+        
+        // منطق شبیه‌سازی
+        if (simulateMode) {
+            const type = el.getAttribute('data-type');
+            if(type === 'button') {
+                const linkName = el.dataset.link;
+                const targetPage = pages.find(p => p.name === linkName);
+                if(targetPage) renderSimulatorView(targetPage.id);
+            } else if(type === 'switch') {
+                const sw = el.querySelector('.boolean-switch, .boolean-checkbox');
+                if(sw) sw.classList.toggle('on');
+            }
+            return;
+        }
+        
         if (el.classList.contains('locked') && !e.target.classList.contains('tool-btn')) selectLockedElement(el);
     });
 }
 
 const canvas = document.getElementById('canvas');
 canvas.addEventListener('touchstart', (e) => {
+    if(simulateMode) return; // تو شبیه‌سازی ساز مانیتور غیرفعال
     if (e.target.classList.contains('tool-btn')) return; if (!currentEditEl) return; e.preventDefault();
     if (e.touches.length === 1) {
         isDragging = true; isPinching = false; hasDragged = false;
@@ -342,6 +416,7 @@ canvas.addEventListener('touchstart', (e) => {
 }, { passive: false });
 
 canvas.addEventListener('touchmove', (e) => {
+    if(simulateMode) return;
     if (!currentEditEl) return;
     if (isPinching && e.touches.length === 2) {
         e.preventDefault(); let scale = getDistance(e.touches[0], e.touches[1]) / initialDist;
@@ -369,6 +444,7 @@ canvas.addEventListener('touchmove', (e) => {
 canvas.addEventListener('touchend', () => { isDragging = false; isPinching = false; });
 
 canvas.addEventListener('mousedown', (e) => {
+    if(simulateMode) return;
     if (e.target.classList.contains('tool-btn')) return; if (!currentEditEl) return;
     isDragging = true; hasDragged = false; startX = e.clientX; startY = e.clientY; startLeft = currentEditEl.offsetLeft; startTop = currentEditEl.offsetTop;
 });
@@ -378,7 +454,7 @@ document.addEventListener('mousemove', (e) => {
     }
 });
 document.addEventListener('mouseup', () => { setTimeout(() => hasDragged = false, 100); isDragging = false; });
-canvas.addEventListener('click', (e) => { if(e.target.id === 'canvas') deselectAllElements(); });
+canvas.addEventListener('click', (e) => { if(e.target.id === 'canvas' && !simulateMode) deselectAllElements(); });
 
 function getDistance(t1, t2) { const dx = t1.clientX - t2.clientX; const dy = t1.clientY - t2.clientY; return Math.sqrt(dx * dx + dy * dy); }
 function rgbToHex(rgb) { if(!rgb || rgb.startsWith('#')) return rgb || '#5fc9f8'; const p = rgb.match(/\d+/g); if(!p) return '#5fc9f8'; return '#' + p.map(x => parseInt(x).toString(16).padStart(2, '0')).join(''); }
