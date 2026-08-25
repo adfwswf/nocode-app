@@ -568,4 +568,14 @@ canvas.addEventListener('mousedown', (e) => {
     if (e.target.classList.contains('tool-btn')) return; if (!currentEditEl) return;
     isDragging = true; hasDragged = false; startX = e.clientX; startY = e.clientY; startLeft = currentEditEl.offsetLeft; startTop = currentEditEl.offsetTop;
 });
-document.addEventListener('mousemove
+document.addEventListener('mousemove', (e) => {
+    if (isDragging && currentEditEl) {
+        hasDragged = true; currentEditEl.style.left = (startLeft + e.clientX - startX) + 'px'; currentEditEl.style.top = (startTop + e.clientY - startY) + 'px';
+    }
+});
+document.addEventListener('mouseup', () => { setTimeout(() => hasDragged = false, 100); isDragging = false; });
+canvas.addEventListener('click', (e) => { if(e.target.id === 'canvas' && !simulateMode) deselectAllElements(); });
+
+function getDistance(t1, t2) { const dx = t1.clientX - t2.clientX; const dy = t1.clientY - t2.clientY; return Math.sqrt(dx * dx + dy * dy); }
+function rgbToHex(rgb) { if(!rgb || rgb.startsWith('#')) return rgb || '#5fc9f8'; const p = rgb.match(/\d+/g); if(!p) return '#5fc9f8'; return '#' + p.map(x => parseInt(x).toString(16).padStart(2, '0')).join(''); }
+function isDark(hex) { if(!hex) return false; const c = hex.substring(1), rgb = parseInt(c, 16), r = (rgb >> 16) & 0xff, g = (rgb >> 8) & 0xff, b = (rgb >> 0) & 0xff; return (0.2126*r + 0.7152*g + 0.0722*b) < 128; }
