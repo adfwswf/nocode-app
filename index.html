@@ -21,12 +21,25 @@
     </div>
 
     <div id="builder-screen" class="screen">
-        <div class="builder-header">
+        <!-- هدر سازنده -->
+        <div class="builder-header" id="builder-header">
             <button class="header-btn" onclick="goToHome()">⟵</button>
-            <h3>محیط طراحی اپ</h3>
-            <!-- تغییر اینجا صورت گرفت -->
-            <button class="header-btn" onclick="showView('view-main'); openDrawer();">⚙️</button>
+            <!-- منوی کشویی صفحات -->
+            <select id="page-switcher" class="page-switcher" onchange="selectPage(this.value)"></select>
+            <div style="display:flex; gap:10px; margin-right:auto;">
+                <button class="header-btn" onclick="toggleDeviceView()" title="تغییر نمایش">🖥️</button>
+                <button class="header-btn" onclick="startSimulation()" title="شبیه‌سازی">▶️</button>
+                <button class="header-btn" onclick="showView('view-main'); openDrawer();" title="افزودن">➕</button>
+            </div>
         </div>
+        
+        <!-- هدر شبیه‌ساز -->
+        <div class="builder-header" id="simulator-header" style="display:none; background:#0e1621;">
+            <button class="header-btn" onclick="stopSimulation()">⏹️</button>
+            <h3>حالت شبیه‌سازی</h3>
+            <div style="margin-right:auto;"><button class="header-btn" onclick="restartSimulation()">🔄</button></div>
+        </div>
+
         <div class="canvas-area" id="canvas"></div>
     </div>
 
@@ -58,6 +71,7 @@
                 <div class="form-group"><label>نام صفحه</label><input type="text" id="page-name" class="form-control" oninput="updatePageData()"></div>
                 <div class="form-group"><label>رنگ پس‌زمینه صفحه</label><input type="color" id="page-bg-color" class="color-input" onchange="updatePageData()"></div>
                 <button class="btn-save" id="page-create" style="display:none;" onclick="createPageFromSettings()">✅ ساخت صفحه</button>
+                <button class="btn-save" id="page-set-home" style="background:#f39c12; margin-bottom:10px;" onclick="setAsHomePage()">🌟 تنظیم به عنوان صفحه اصلی</button>
                 <button class="btn-danger" id="page-delete" onclick="deleteSelectedPage()">🗑 حذف این صفحه</button>
             </div>
 
@@ -112,7 +126,7 @@
                     </div>
                 </div>
                 <div class="form-group">
-                    <label>اتصال به صفحه</label>
+                    <label>اتصال به صفحه (برای شبیه‌سازی)</label>
                     <select id="btn-link-page" class="form-control" onchange="updateElement()"></select>
                 </div>
                 <button class="btn-save" id="btn-create" style="display:none;" onclick="createElementFromSettings('button')">✅ ساخت دکمه</button>
@@ -218,7 +232,6 @@
     </div>
 </div>
 
-<!-- مطمئن شو اسم فایل دقیقاً script.js باشه -->
 <script src="script.js"></script>
 </body>
 </html>
