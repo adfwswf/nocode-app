@@ -10,8 +10,9 @@
 <body>
 
 <div class="app-container">
+    <!-- صفحه اصلی -->
     <div id="home-screen" class="screen active">
-        <div class="card" onclick="goToBuilder()">
+        <div class="card" onclick="enterApp()">
             <div class="card-text">
                 <h2>ساخت اپ موبایل</h2>
                 <span>اپلیکیشن وب و اندروید</span>
@@ -20,9 +21,33 @@
         </div>
     </div>
 
+    <!-- صفحه ورود/ثبت نام -->
+    <div id="auth-screen" class="screen">
+        <h1>ورود / ثبت‌نام</h1>
+        <input type="text" id="auth-username" class="form-control" placeholder="نام کاربری" style="margin-bottom:15px;">
+        <input type="password" id="auth-password" class="form-control" placeholder="رمز عبور" style="margin-bottom:15px;">
+        <button class="btn-save" onclick="login()">ورود</button>
+        <button class="btn-add" onclick="register()">ثبت‌نام</button>
+        <div id="auth-status" style="color:#e74c3c; margin-top:15px; text-align:center;"></div>
+        <button class="back-btn" style="margin-top:20px;" onclick="showScreen('home-screen')">⟵ بازگشت</button>
+    </div>
+
+    <!-- پنل پروژه‌ها -->
+    <div id="projects-screen" class="screen">
+        <div class="builder-header">
+            <button class="header-btn" onclick="logout()">⟵</button>
+            <h3>پروژه‌های من</h3>
+            <button class="header-btn" onclick="newProject()">➕</button>
+        </div>
+        <div class="drawer-content" style="padding:20px;">
+            <div id="project-list"></div>
+        </div>
+    </div>
+
+    <!-- محیط سازنده اپ -->
     <div id="builder-screen" class="screen">
         <div class="builder-header" id="builder-header">
-            <button class="header-btn" onclick="goToHome()">⟵</button>
+            <button class="header-btn" onclick="goToProjects()">⟵</button>
             <select id="page-switcher" class="page-switcher" onchange="switchPage(this.value)"></select>
             <div style="display:flex; gap:10px; margin-right:auto;">
                 <button class="header-btn" id="device-btn" onclick="toggleDeviceView(this)" title="تغییر نمایش">💻</button>
