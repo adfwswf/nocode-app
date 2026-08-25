@@ -12,12 +12,11 @@ function renderPages() {
     const list = document.getElementById('existing-pages'); list.innerHTML = '';
     const switcher = document.getElementById('page-switcher'); switcher.innerHTML = '';
     pages.forEach(p => {
-        // لیست در منو
         const item = document.createElement('div');
         item.className = 'menu-item'; item.innerHTML = `<span>📄 ${p.name}</span><span>›</span>`;
         item.onclick = () => selectPage(p.id);
         list.appendChild(item);
-        // منوی کشویی بالا
+        
         const opt = document.createElement('option');
         opt.value = p.id; opt.innerText = p.name + (p.id === homePageId ? " (صفحه اصلی)" : "");
         switcher.appendChild(opt);
@@ -42,25 +41,27 @@ function createPageFromSettings() {
     selectPage(newId);
     isCreatingPage = false;
 }
-function selectPage(id) {
-    if(simulateMode) return; // تو شبیه‌سازی ساز مانیتور نمیتونه صفحه عوض کنه
+// تغییر صفحه فقط کنvas (برای منوی بالا)
+function switchPage(id) {
+    if(simulateMode) return;
     selectedPageId = parseInt(id);
     const p = pages.find(x => x.id === selectedPageId); if(!p) return;
     document.getElementById('canvas').style.backgroundColor = p.bg;
-    document.getElementById('page-name').value = p.name;
-    document.getElementById('page-bg-color').value = p.bg;
+    document.querySelectorAll('#canvas .draggable-el').forEach(el => {
+        el.style.display = (parseInt(el.dataset.pageId) === selectedPageId) ? 'flex' : 'none';
+    });
+    document.getElementById('page-switcher').value = selectedPageId;
+    deselectAllElements();
+}
+// انتخاب صفحه (برای باز کردن تنظیماتش از منوی کشویی سمت راست)
+function selectPage(id) {
+    if(simulateMode) return;
+    switchPage(id);
     isCreatingPage = false;
     document.getElementById('page-create').style.display = 'none';
     document.getElementById('page-delete').style.display = 'block';
     document.getElementById('page-set-home').style.display = (selectedPageId === homePageId) ? 'none' : 'block';
-    
-    // مخفی کردن المان‌های صفحه‌های دیگه
-    document.querySelectorAll('#canvas .draggable-el').forEach(el => {
-        el.style.display = (parseInt(el.dataset.pageId) === selectedPageId) ? 'flex' : 'none';
-    });
-    
     showView('view-page-settings');
-    document.getElementById('page-switcher').value = selectedPageId;
 }
 function updatePageData() {
     if(isCreatingPage) return;
@@ -79,9 +80,8 @@ function deleteSelectedPage() {
 }
 function setAsHomePage() {
     homePageId = selectedPageId;
-    document.getElementById('page-set-home').style.display = 'none';
+    document.getElementById('page-set-home').style.display = 'none'; // دکمه میره
     renderPages();
-    alert("صفحه اصلی با موفقیت تغییر کرد!");
 }
 
 // --- ناوبری ---
@@ -96,9 +96,7 @@ function showView(viewId) {
     updateExistingLists();
 }
 
-function toggleDeviceView() {
-    document.body.classList.toggle('desktop-mode');
-}
+function toggleDeviceView() { document.body.classList.toggle('desktop-mode'); }
 
 // --- شبیه‌سازی ---
 function startSimulation() {
@@ -115,9 +113,8 @@ function stopSimulation() {
     document.getElementById('builder-header').style.display = 'flex';
     document.getElementById('simulator-header').style.display = 'none';
     document.getElementById('canvas').classList.remove('simulate-active');
-    // غیرفعال کردن مجدد اینپوت‌ها
     document.querySelectorAll('#canvas input').forEach(inp => inp.disabled = true);
-    selectPage(selectedPageId);
+    switchPage(selectedPageId);
 }
 function restartSimulation() { renderSimulatorView(homePageId); }
 function renderSimulatorView(pageId) {
@@ -127,7 +124,7 @@ function renderSimulatorView(pageId) {
         if(parseInt(el.dataset.pageId) === pageId) {
             el.style.display = 'flex';
             const input = el.querySelector('input');
-            if(input) input.disabled = false; // فعال کردن تایپ متن
+            if(input) input.disabled = false;
         } else {
             el.style.display = 'none';
         }
@@ -187,7 +184,7 @@ function createElementFromSettings(type) {
     const el = document.createElement('div');
     el.className = 'draggable-el locked'; el.style.top = '100px'; el.style.left = '100px';
     el.setAttribute('data-type', type);
-    el.dataset.pageId = selectedPageId; // اختصاص به صفحه فعلی
+    el.dataset.pageId = selectedPageId;
     const content = document.createElement('div'); content.className = 'el-content'; el.appendChild(content);
     document.getElementById('canvas').appendChild(el);
     initInteractions(el); applySettingsToElement(el); enableEditMode(el); hideDrawer();
@@ -202,12 +199,12 @@ function applySettingsToElement(el) {
         el.style.fontFamily = `${document.getElementById('btn-font').value}, sans-serif`;
         el.style.fontSize = document.getElementById('btn-font-size').value + 'px';
         el.style.fontWeight = document.getElementById('btn-font-weight').value;
+        el.style.color = document.getElementById('btn-text-color').value; // رنگ متن دکمه اضافه شد
         
         if(document.getElementById('btn-bg-transparent').checked) {
-            el.style.background = 'transparent'; el.style.color = '#ffffff';
+            el.style.background = 'transparent';
         } else {
             el.style.background = document.getElementById('btn-bg-color').value;
-            el.style.color = isDark(el.style.background) ? '#ffffff' : '#17212b';
         }
         if(document.getElementById('btn-border-transparent').checked) {
             el.style.borderColor = 'transparent'; el.style.borderWidth = '0px';
@@ -245,7 +242,8 @@ function applySettingsToElement(el) {
         el.style.background = 'transparent'; el.style.border = 'none';
     } else if(type === 'input') {
         const ph = document.getElementById('in-placeholder').value;
-        content.innerHTML = `<input type="text" placeholder="${ph}" style="width: 100%; height: 100%; background: transparent; border: none; color: white; font-family: 'Vazirmatn'; outline: none; pointer-events: none; padding: 0 10px;" disabled>`;
+        const txtColor = document.getElementById('in-text-color').value; // رنگ متن اینپوت
+        content.innerHTML = `<input type="text" placeholder="${ph}" style="width: 100%; height: 100%; background: transparent; border: none; color: ${txtColor}; font-family: 'Vazirmatn'; outline: none; pointer-events: none; padding: 0 10px;" disabled>`;
         el.style.width = document.getElementById('in-width').value + 'px';
         el.style.height = document.getElementById('in-height').value + 'px';
         el.style.background = document.getElementById('in-bg-color').value;
@@ -271,11 +269,17 @@ function cancelEdit(el) {
     }
     else { el.remove(); selectedElement = null; currentEditEl = null; }
 }
+function deleteElement(el) {
+    if(confirm("آیا از حذف این المان مطمئن هستید؟")) {
+        el.remove(); selectedElement = null; currentEditEl = null; updateExistingLists();
+    }
+}
 function selectLockedElement(el) {
     deselectAllElements(); el.classList.add('selected');
     const toolbar = document.createElement('div'); toolbar.className = 'btn-toolbar';
     toolbar.appendChild(createToolBtn('edit', '✏️', () => enableEditMode(el)));
     toolbar.appendChild(createToolBtn('settings', '⚙️', () => { loadSettingsForElement(el); openDrawer(); }));
+    toolbar.appendChild(createToolBtn('trash', '🗑️', () => deleteElement(el))); // سطل اشغال
     el.appendChild(toolbar);
 }
 function enableEditMode(el) {
@@ -296,6 +300,7 @@ function loadSettingsForElement(el) {
         document.getElementById('btn-font-size').value = parseInt(el.style.fontSize) || 16;
         document.getElementById('btn-font-weight').value = el.style.fontWeight || 'normal';
         document.getElementById('btn-font').value = el.style.fontFamily.split(',')[0].trim() || 'Vazirmatn';
+        document.getElementById('btn-text-color').value = rgbToHex(el.style.color) || '#ffffff'; // لود رنگ متن
         if(el.style.background === 'transparent' || el.style.background === '') {
             document.getElementById('btn-bg-transparent').checked = true; document.getElementById('btn-bg-color').disabled = true;
         } else {
@@ -342,6 +347,7 @@ function loadSettingsForElement(el) {
         document.getElementById('in-width').value = parseFloat(el.style.width) || 200;
         document.getElementById('in-height').value = parseFloat(el.style.height) || 40;
         document.getElementById('in-bg-color').value = rgbToHex(el.style.background);
+        document.getElementById('in-text-color').value = input ? rgbToHex(input.style.color) : '#ffffff'; // لود رنگ متن اینپوت
         document.getElementById('in-border-color').value = rgbToHex(el.style.borderColor);
         document.getElementById('in-create').style.display = 'none'; document.getElementById('in-delete').style.display = 'block';
         showView('view-input-settings');
@@ -353,7 +359,7 @@ function updateExistingLists() {
     for(let type in types) {
         const list = document.getElementById(types[type]); if(!list) continue; list.innerHTML = '';
         document.querySelectorAll(`#canvas .draggable-el[data-type="${type}"]`).forEach((el, i) => {
-            if(parseInt(el.dataset.pageId) !== selectedPageId) return; // فقط المان‌های همین صفحه
+            if(parseInt(el.dataset.pageId) !== selectedPageId) return;
             const item = document.createElement('div'); item.className = 'menu-item'; item.style.marginBottom = '8px';
             const content = el.querySelector('.el-content');
             if(type === 'button' || type === 'text') item.innerText = content.innerText.substring(0,15);
@@ -382,8 +388,6 @@ function createToolBtn(type, icon, callback) {
 function initInteractions(el) {
     el.addEventListener('click', (e) => {
         if (hasDragged) { hasDragged = false; return; }
-        
-        // منطق شبیه‌سازی
         if (simulateMode) {
             const type = el.getAttribute('data-type');
             if(type === 'button') {
@@ -396,14 +400,13 @@ function initInteractions(el) {
             }
             return;
         }
-        
         if (el.classList.contains('locked') && !e.target.classList.contains('tool-btn')) selectLockedElement(el);
     });
 }
 
 const canvas = document.getElementById('canvas');
 canvas.addEventListener('touchstart', (e) => {
-    if(simulateMode) return; // تو شبیه‌سازی ساز مانیتور غیرفعال
+    if(simulateMode) return;
     if (e.target.classList.contains('tool-btn')) return; if (!currentEditEl) return; e.preventDefault();
     if (e.touches.length === 1) {
         isDragging = true; isPinching = false; hasDragged = false;
