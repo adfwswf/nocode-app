@@ -1,9 +1,12 @@
 * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Vazirmatn', Tahoma, sans-serif; -webkit-tap-highlight-color: transparent; }
-body { background-color: #0f0f1a; color: white; display: flex; justify-content: center; min-height: 100vh; overflow: hidden; }
-.app-container { width: 100%; max-width: 450px; background-color: #17212b; min-height: 100vh; position: relative; overflow: hidden; transition: max-width 0.3s; }
-body.desktop-mode .app-container { max-width: 900px; border-left: 1px solid #2c3e50; border-right: 1px solid #2c3e50; }
+body { background-color: #0f0f1a; color: white; display: flex; justify-content: center; align-items: center; min-height: 100vh; overflow: hidden; }
 
-.screen { display: none; flex-direction: column; height: 100vh; }
+.app-container { width: 100%; max-width: 450px; height: 100vh; background-color: #17212b; position: relative; overflow: hidden; transition: max-width 0.3s, height 0.3s, border-radius 0.3s, border 0.3s; }
+
+body.desktop-mode { background-color: #0a0a12; padding: 20px; }
+body.desktop-mode .app-container { max-width: 900px; height: 90vh; border-radius: 15px; border: 1px solid #2c3e50; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
+
+.screen { display: none; flex-direction: column; height: 100%; }
 .screen.active { display: flex; }
 
 #home-screen { justify-content: center; align-items: center; padding: 20px; text-align: center; }
@@ -12,13 +15,13 @@ body.desktop-mode .app-container { max-width: 900px; border-left: 1px solid #2c3
 .card span { font-size: 14px; opacity: 0.9; }
 .card-icon { font-size: 50px; }
 
-#builder-screen { background-color: #0e1621; position: relative; transition: background-color 0.3s; }
-.builder-header { background: #17212b; padding: 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #2c3e50; z-index: 100; gap: 10px; }
+#builder-screen { background-color: #0e1621; position: relative; transition: background-color 0.3s; border-radius: inherit; }
+.builder-header { background: #17212b; padding: 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #2c3e50; z-index: 100; gap: 10px; border-radius: 15px 15px 0 0; }
 .builder-header h3 { color: white; font-size: 16px; }
 .header-btn { background: transparent; border: none; color: #5fc9f8; font-size: 24px; cursor: pointer; }
 .page-switcher { background: #0e1621; color: white; border: 1px solid #2c3e50; border-radius: 8px; padding: 8px; font-size: 14px; flex: 1; max-width: 150px; }
 
-.canvas-area { flex: 1; position: relative; overflow: hidden; touch-action: none; }
+.canvas-area { flex: 1; position: relative; overflow: hidden; touch-action: none; border-radius: 0 0 15px 15px; }
 
 .draggable-el { position: absolute; cursor: pointer; display: flex; align-items: center; justify-content: center; border-style: solid; border-width: 2px; border-color: transparent; touch-action: none; overflow: visible; z-index: 5; }
 .el-content { pointer-events: none; user-select: none; width: 100%; height: 100%; text-align: center; display: flex; align-items: center; justify-content: center; gap: 8px; overflow: hidden; border-radius: inherit; }
@@ -47,7 +50,7 @@ body.desktop-mode .app-container { max-width: 900px; border-left: 1px solid #2c3
 
 .drawer-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; z-index: 50; }
 .drawer-overlay.active { display: block; }
-.drawer { position: absolute; top: 0; right: -300px; width: 280px; height: 100%; background-color: #17212b; box-shadow: -5px 0 15px rgba(0,0,0,0.3); transition: right 0.3s ease; z-index: 60; display: flex; flex-direction: column; }
+.drawer { position: absolute; top: 0; right: -300px; width: 280px; height: 100%; background-color: #17212b; box-shadow: -5px 0 15px rgba(0,0,0,0.3); transition: right 0.3s ease; z-index: 60; display: flex; flex-direction: column; border-radius: 0 0 0 15px; }
 .drawer.active { right: 0; }
 .drawer-header { padding: 15px; border-bottom: 1px solid #2c3e50; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
 .drawer-header h4 { font-size: 16px; color: white; }
