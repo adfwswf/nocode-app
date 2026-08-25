@@ -41,7 +41,6 @@ function createPageFromSettings() {
     selectPage(newId);
     isCreatingPage = false;
 }
-// تغییر صفحه فقط کنvas (برای منوی بالا)
 function switchPage(id) {
     if(simulateMode) return;
     selectedPageId = parseInt(id);
@@ -53,7 +52,6 @@ function switchPage(id) {
     document.getElementById('page-switcher').value = selectedPageId;
     deselectAllElements();
 }
-// انتخاب صفحه (برای باز کردن تنظیماتش از منوی کشویی سمت راست)
 function selectPage(id) {
     if(simulateMode) return;
     switchPage(id);
@@ -80,7 +78,7 @@ function deleteSelectedPage() {
 }
 function setAsHomePage() {
     homePageId = selectedPageId;
-    document.getElementById('page-set-home').style.display = 'none'; // دکمه میره
+    document.getElementById('page-set-home').style.display = 'none';
     renderPages();
 }
 
@@ -96,7 +94,35 @@ function showView(viewId) {
     updateExistingLists();
 }
 
-function toggleDeviceView() { document.body.classList.toggle('desktop-mode'); }
+// تغییر قاب نمایش
+function toggleDeviceView(btn) {
+    document.body.classList.toggle('desktop-mode');
+    if(document.body.classList.contains('desktop-mode')) {
+        btn.innerText = '📱'; // اگه تو حالت دسکتاپه، آیکون موبایل رو نشون بده که بتونی برگردی
+    } else {
+        btn.innerText = '💻'; // اگه تو حالت موبایله، آیکون لپ‌تاپ رو نشون بده
+    }
+}
+
+// ذخیره اطلاعات اپ
+function saveAppData() {
+    let appData = { pages: pages, elements: [] };
+    document.querySelectorAll('#canvas .draggable-el').forEach(el => {
+        appData.elements.push({
+            pageId: el.dataset.pageId,
+            type: el.dataset.type,
+            top: el.style.top, left: el.style.left,
+            width: el.style.width, height: el.style.height,
+            background: el.style.background, color: el.style.color,
+            borderColor: el.style.borderColor, borderWidth: el.style.borderWidth,
+            borderRadius: el.style.borderRadius,
+            fontFamily: el.style.fontFamily, fontSize: el.style.fontSize, fontWeight: el.style.fontWeight,
+            link: el.dataset.link
+        });
+    });
+    localStorage.setItem('nocode_app_data', JSON.stringify(appData));
+    alert("✅ اپلیکیشن با موفقیت ذخیره شد!\n(اطلاعات در حافظه مرورگر ذخیره شد)");
+}
 
 // --- شبیه‌سازی ---
 function startSimulation() {
@@ -199,7 +225,13 @@ function applySettingsToElement(el) {
         el.style.fontFamily = `${document.getElementById('btn-font').value}, sans-serif`;
         el.style.fontSize = document.getElementById('btn-font-size').value + 'px';
         el.style.fontWeight = document.getElementById('btn-font-weight').value;
-        el.style.color = document.getElementById('btn-text-color').value; // رنگ متن دکمه اضافه شد
+        
+        // رنگ متن دکمه (شفاف یا رنگی)
+        if(document.getElementById('btn-text-transparent').checked) {
+            el.style.color = 'transparent';
+        } else {
+            el.style.color = document.getElementById('btn-text-color').value;
+        }
         
         if(document.getElementById('btn-bg-transparent').checked) {
             el.style.background = 'transparent';
@@ -242,7 +274,7 @@ function applySettingsToElement(el) {
         el.style.background = 'transparent'; el.style.border = 'none';
     } else if(type === 'input') {
         const ph = document.getElementById('in-placeholder').value;
-        const txtColor = document.getElementById('in-text-color').value; // رنگ متن اینپوت
+        const txtColor = document.getElementById('in-text-color').value;
         content.innerHTML = `<input type="text" placeholder="${ph}" style="width: 100%; height: 100%; background: transparent; border: none; color: ${txtColor}; font-family: 'Vazirmatn'; outline: none; pointer-events: none; padding: 0 10px;" disabled>`;
         el.style.width = document.getElementById('in-width').value + 'px';
         el.style.height = document.getElementById('in-height').value + 'px';
@@ -279,7 +311,7 @@ function selectLockedElement(el) {
     const toolbar = document.createElement('div'); toolbar.className = 'btn-toolbar';
     toolbar.appendChild(createToolBtn('edit', '✏️', () => enableEditMode(el)));
     toolbar.appendChild(createToolBtn('settings', '⚙️', () => { loadSettingsForElement(el); openDrawer(); }));
-    toolbar.appendChild(createToolBtn('trash', '🗑️', () => deleteElement(el))); // سطل اشغال
+    toolbar.appendChild(createToolBtn('trash', '🗑️', () => deleteElement(el)));
     el.appendChild(toolbar);
 }
 function enableEditMode(el) {
@@ -300,7 +332,17 @@ function loadSettingsForElement(el) {
         document.getElementById('btn-font-size').value = parseInt(el.style.fontSize) || 16;
         document.getElementById('btn-font-weight').value = el.style.fontWeight || 'normal';
         document.getElementById('btn-font').value = el.style.fontFamily.split(',')[0].trim() || 'Vazirmatn';
-        document.getElementById('btn-text-color').value = rgbToHex(el.style.color) || '#ffffff'; // لود رنگ متن
+        
+        // لود رنگ متن دکمه
+        if(el.style.color === 'transparent') {
+            document.getElementById('btn-text-transparent').checked = true;
+            document.getElementById('btn-text-color').disabled = true;
+        } else {
+            document.getElementById('btn-text-transparent').checked = false;
+            document.getElementById('btn-text-color').disabled = false;
+            document.getElementById('btn-text-color').value = rgbToHex(el.style.color) || '#ffffff';
+        }
+
         if(el.style.background === 'transparent' || el.style.background === '') {
             document.getElementById('btn-bg-transparent').checked = true; document.getElementById('btn-bg-color').disabled = true;
         } else {
@@ -347,7 +389,7 @@ function loadSettingsForElement(el) {
         document.getElementById('in-width').value = parseFloat(el.style.width) || 200;
         document.getElementById('in-height').value = parseFloat(el.style.height) || 40;
         document.getElementById('in-bg-color').value = rgbToHex(el.style.background);
-        document.getElementById('in-text-color').value = input ? rgbToHex(input.style.color) : '#ffffff'; // لود رنگ متن اینپوت
+        document.getElementById('in-text-color').value = input ? rgbToHex(input.style.color) : '#ffffff';
         document.getElementById('in-border-color').value = rgbToHex(el.style.borderColor);
         document.getElementById('in-create').style.display = 'none'; document.getElementById('in-delete').style.display = 'block';
         showView('view-input-settings');
